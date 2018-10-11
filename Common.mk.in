@@ -1,0 +1,26 @@
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+bindir      = @bindir@
+mandir      = @mandir@
+datarootdir = @datarootdir@
+
+EXEC = $(bindir)
+MAN1 = $(mandir)/man1
+MAN3 = $(mandir)/man3
+MAN5 = $(mandir)/man5
+
+CC        = @CC@
+CFLAGS   += @DEFS@ @CFLAGS@
+LDFLAGS  += @LDFLAGS@
+LDLIBS   += @LIBS@
+
+INSTALL    = @INSTALL@
+INSTDIR    = $(INSTALL) -d
+INSTBINEX  = @INSTALL_PROGRAM@
+INSTDATA   = @INSTALL_DATA@
+INSTSCRIPT = @INSTALL_SCRIPT@
+GGO        = @GGO@
+
+VERSION    = @PACKAGE_VERSION@
+
+WITH_UNIT = @WITH_UNIT@

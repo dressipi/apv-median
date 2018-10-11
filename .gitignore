@@ -1,0 +1,5 @@
+config.log
+config.status
+Common.mk
+src/config.h
+src/*.o

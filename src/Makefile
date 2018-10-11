@@ -1,4 +1,4 @@
-LIB = libavmedian.a
+LIB = libapvmedian.a
 OBJ = avltree.o
 
 default : all
@@ -8,12 +8,14 @@ default : all
 CFLAGS += -Wall -std=c99 -O
 LDLIBS += -lm
 
-all : $(LIB)
+all: $(LIB)
 
-$(LIB) : $(OBJ)
+$(LIB): $(OBJ)
 	ar rs $(LIB) $(OBJ)
 
-clean :
+clean:
 	$(RM) $(LIB) $(OBJ)
 
-.PHONY : default all clean
+spotless: clean
+
+.PHONY: default all clean

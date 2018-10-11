@@ -6,53 +6,46 @@
 */
 
 #include "avltree.h"
-
-#ifdef __cplusplus
-#include <cstdlib>
-
-using std::malloc;
-using std::free;
-using std::size_t;
-#else
 #include <stdlib.h>
-#endif
 
 #ifndef HEIGHT_LIMIT
-#define HEIGHT_LIMIT 64 /* Tallest allowable tree */
+#define HEIGHT_LIMIT 64
 #endif
 
-typedef struct jsw_avlnode {
-  int                 balance; /* Balance factor */
-  void               *data;    /* User-defined content */
-  struct jsw_avlnode *link[2]; /* Left (0) and right (1) links */
-} jsw_avlnode_t;
+typedef struct avlnode {
+  int balance;
+  void *data;
+  struct avlnode *link[2];
+} avlnode_t;
 
-struct jsw_avltree {
-  jsw_avlnode_t *root; /* Top of the tree */
-  cmp_f          cmp;    /* Compare two items */
-  dup_f          dup;    /* Clone an item (user-defined) */
-  rel_f          rel;    /* Destroy an item (user-defined) */
-  size_t         size;   /* Number of items (user-defined) */
+struct avltree {
+  avlnode_t *root;
+  cmp_f cmp;
+  dup_f dup;
+  rel_f rel;
+  size_t size;
 };
 
-struct jsw_avltrav {
-  jsw_avltree_t *tree;               /* Paired tree */
-  jsw_avlnode_t *it;                 /* Current node */
-  jsw_avlnode_t *path[HEIGHT_LIMIT]; /* Traversal path */
-  size_t         top;                /* Top of stack */
+struct avltrav {
+  avltree_t *tree;
+  avlnode_t *it;
+  avlnode_t *path[HEIGHT_LIMIT];
+  size_t top;
 };
 
 /* Two way single rotation */
-#define jsw_single(root,dir) do {         \
-  jsw_avlnode_t *save = root->link[!dir]; \
+
+#define single(root,dir) do {         \
+  avlnode_t *save = root->link[!dir]; \
   root->link[!dir] = save->link[dir];     \
   save->link[dir] = root;                 \
   root = save;                            \
 } while (0)
 
 /* Two way double rotation */
-#define jsw_double(root,dir) do {                    \
-  jsw_avlnode_t *save = root->link[!dir]->link[dir]; \
+
+#define double(root,dir) do {                    \
+  avlnode_t *save = root->link[!dir]->link[dir]; \
   root->link[!dir]->link[dir] = save->link[!dir];    \
   save->link[!dir] = root->link[!dir];               \
   root->link[!dir] = save;                           \
@@ -63,12 +56,13 @@ struct jsw_avltrav {
 } while (0)
 
 /* Adjust balance before double rotation */
-#define jsw_adjust_balance(root,dir,bal) do { \
-  jsw_avlnode_t *n = root->link[dir];         \
-  jsw_avlnode_t *nn = n->link[!dir];          \
-  if ( nn->balance == 0 )                     \
+
+#define adjust_balance(root,dir,bal) do { \
+  avlnode_t *n = root->link[dir];         \
+  avlnode_t *nn = n->link[!dir];          \
+  if (nn->balance == 0)                     \
     root->balance = n->balance = 0;           \
-  else if ( nn->balance == bal ) {            \
+  else if (nn->balance == bal) {            \
     root->balance = -bal;                     \
     n->balance = 0;                           \
   }                                           \
@@ -80,58 +74,59 @@ struct jsw_avltrav {
 } while (0)
 
 /* Rebalance after insertion */
-#define jsw_insert_balance(root,dir) do {  \
-  jsw_avlnode_t *n = root->link[dir];      \
+
+#define insert_balance(root,dir) do {  \
+  avlnode_t *n = root->link[dir];      \
   int bal = dir == 0 ? -1 : +1;            \
-  if ( n->balance == bal ) {               \
+  if (n->balance == bal) {               \
     root->balance = n->balance = 0;        \
-    jsw_single ( root, !dir );             \
+    single(root, !dir);             \
   }                                        \
   else { /* n->balance == -bal */          \
-    jsw_adjust_balance ( root, dir, bal ); \
-    jsw_double ( root, !dir );             \
+    adjust_balance(root, dir, bal); \
+    double(root, !dir);             \
   }                                        \
 } while (0)
 
 /* Rebalance after deletion */
-#define jsw_remove_balance(root,dir,done) do { \
-  jsw_avlnode_t *n = root->link[!dir];         \
+#define remove_balance(root,dir,done) do { \
+  avlnode_t *n = root->link[!dir];         \
   int bal = dir == 0 ? -1 : +1;                \
-  if ( n->balance == -bal ) {                  \
+  if (n->balance == -bal) {                  \
     root->balance = n->balance = 0;            \
-    jsw_single ( root, dir );                  \
+    single(root, dir);                  \
   }                                            \
-  else if ( n->balance == bal ) {              \
-    jsw_adjust_balance ( root, !dir, -bal );   \
-    jsw_double ( root, dir );                  \
+  else if (n->balance == bal) {              \
+    adjust_balance(root, !dir, -bal);   \
+    double(root, dir);                  \
   }                                            \
   else { /* n->balance == 0 */                 \
     root->balance = -bal;                      \
     n->balance = bal;                          \
-    jsw_single ( root, dir );                  \
+    single(root, dir);                  \
     done = 1;                                  \
   }                                            \
 } while (0)
 
-static jsw_avlnode_t *new_node ( jsw_avltree_t *tree, void *data )
+static avlnode_t* new_node(avltree_t *tree, void *data)
 {
-  jsw_avlnode_t *rn = (jsw_avlnode_t *)malloc ( sizeof *rn );
+  avlnode_t *rn = (avlnode_t *)malloc(sizeof *rn);
 
-  if ( rn == NULL )
+  if (rn == NULL)
     return NULL;
 
   rn->balance = 0;
-  rn->data = tree->dup ( data );
+  rn->data = tree->dup(data);
   rn->link[0] = rn->link[1] = NULL;
 
   return rn;
 }
 
-jsw_avltree_t *jsw_avlnew ( cmp_f cmp, dup_f dup, rel_f rel )
+avltree_t* avlnew(cmp_f cmp, dup_f dup, rel_f rel)
 {
-  jsw_avltree_t *rt = (jsw_avltree_t *)malloc ( sizeof *rt );
+  avltree_t *rt = (avltree_t *)malloc(sizeof *rt);
 
-  if ( rt == NULL )
+  if (rt == NULL)
     return NULL;
 
   rt->root = NULL;
@@ -143,18 +138,18 @@ jsw_avltree_t *jsw_avlnew ( cmp_f cmp, dup_f dup, rel_f rel )
   return rt;
 }
 
-void jsw_avldelete ( jsw_avltree_t *tree )
+void avldelete(avltree_t *tree)
 {
-  jsw_avlnode_t *it = tree->root;
-  jsw_avlnode_t *save;
+  avlnode_t *it = tree->root;
+  avlnode_t *save;
 
   /* Destruction by rotation */
-  while ( it != NULL ) {
-    if ( it->link[0] == NULL ) {
+  while (it != NULL) {
+    if (it->link[0] == NULL) {
       /* Remove node */
       save = it->link[1];
-      tree->rel ( it->data );
-      free ( it );
+      tree->rel(it->data);
+      free(it);
     }
     else {
       /* Rotate right */
@@ -166,17 +161,17 @@ void jsw_avldelete ( jsw_avltree_t *tree )
     it = save;
   }
 
-  free ( tree );
+  free(tree);
 }
 
-void *jsw_avlfind ( jsw_avltree_t *tree, void *data )
+void* avlfind(avltree_t *tree, void *data)
 {
-  jsw_avlnode_t *it = tree->root;
+  avlnode_t *it = tree->root;
 
-  while ( it != NULL ) {
-    int cmp = tree->cmp ( it->data, data );
+  while (it != NULL) {
+    int cmp = tree->cmp(it->data, data);
 
-    if ( cmp == 0 )
+    if (cmp == 0)
       break;
 
     it = it->link[cmp < 0];
@@ -185,18 +180,18 @@ void *jsw_avlfind ( jsw_avltree_t *tree, void *data )
   return it == NULL ? NULL : it->data;
 }
 
-int jsw_avlinsert ( jsw_avltree_t *tree, void *data )
+int avlinsert(avltree_t *tree, void *data)
 {
   /* Empty tree case */
-  if ( tree->root == NULL ) {
-    tree->root = new_node ( tree, data );
-    if ( tree->root == NULL )
+  if (tree->root == NULL) {
+    tree->root = new_node(tree, data);
+    if (tree->root == NULL)
       return 0;
   }
   else {
-    jsw_avlnode_t head = {0}; /* Temporary tree root */
-    jsw_avlnode_t *s, *t;     /* Place to rebalance and parent */
-    jsw_avlnode_t *p, *q;     /* Iterator and save pointer */
+    avlnode_t head = {0}; /* Temporary tree root */
+    avlnode_t *s, *t;     /* Place to rebalance and parent */
+    avlnode_t *p, *q;     /* Iterator and save pointer */
     int dir;
 
     /* Set up false root to ease maintenance */
@@ -204,39 +199,39 @@ int jsw_avlinsert ( jsw_avltree_t *tree, void *data )
     t->link[1] = tree->root;
 
     /* Search down the tree, saving rebalance points */
-    for ( s = p = t->link[1]; ; p = q ) {
-      dir = tree->cmp ( p->data, data ) < 0;
+    for (s = p = t->link[1]; ; p = q) {
+      dir = tree->cmp(p->data, data) < 0;
       q = p->link[dir];
 
-      if ( q == NULL )
+      if (q == NULL)
         break;
 
-      if ( q->balance != 0 ) {
+      if (q->balance != 0) {
         t = p;
         s = q;
       }
     }
 
-    p->link[dir] = q = new_node ( tree, data );
-    if ( q == NULL )
+    p->link[dir] = q = new_node(tree, data);
+    if (q == NULL)
       return 0;
 
     /* Update balance factors */
-    for ( p = s; p != q; p = p->link[dir] ) {
-      dir = tree->cmp ( p->data, data ) < 0;
+    for (p = s; p != q; p = p->link[dir]) {
+      dir = tree->cmp(p->data, data) < 0;
       p->balance += dir == 0 ? -1 : +1;
     }
 
     q = s; /* Save rebalance point for parent fix */
 
     /* Rebalance if necessary */
-    if ( abs ( s->balance ) > 1 ) {
-      dir = tree->cmp ( s->data, data ) < 0;
-      jsw_insert_balance ( s, dir );
+    if (abs(s->balance) > 1) {
+      dir = tree->cmp(s->data, data) < 0;
+      insert_balance(s, dir);
     }
 
     /* Fix parent */
-    if ( q == head.link[1] )
+    if (q == head.link[1])
       tree->root = s;
     else
       t->link[q == t->link[1]] = s;
@@ -247,53 +242,53 @@ int jsw_avlinsert ( jsw_avltree_t *tree, void *data )
   return 1;
 }
 
-int jsw_avlerase ( jsw_avltree_t *tree, void *data )
+int avlerase(avltree_t *tree, void *data)
 {
-  if ( tree->root != NULL ) {
-    jsw_avlnode_t *it, *up[HEIGHT_LIMIT];
+  if (tree->root != NULL) {
+    avlnode_t *it, *up[HEIGHT_LIMIT];
     int upd[HEIGHT_LIMIT], top = 0;
     int done = 0;
 
     it = tree->root;
 
     /* Search down tree and save path */
-    for ( ; ; ) {
-      if ( it == NULL )
+    for (; ;) {
+      if (it == NULL)
         return 0;
-      else if ( tree->cmp ( it->data, data ) == 0 )
+      else if (tree->cmp(it->data, data) == 0)
         break;
 
       /* Push direction and node onto stack */
-      upd[top] = tree->cmp ( it->data, data ) < 0;
+      upd[top] = tree->cmp(it->data, data) < 0;
       up[top++] = it;
 
       it = it->link[upd[top - 1]];
     }
 
     /* Remove the node */
-    if ( it->link[0] == NULL || it->link[1] == NULL ) {
+    if (it->link[0] == NULL || it->link[1] == NULL) {
       /* Which child is not null? */
       int dir = it->link[0] == NULL;
 
       /* Fix parent */
-      if ( top != 0 )
+      if (top != 0)
         up[top - 1]->link[upd[top - 1]] = it->link[dir];
       else
         tree->root = it->link[dir];
 
-      tree->rel ( it->data );
-      free ( it );
+      tree->rel(it->data);
+      free(it);
     }
     else {
       /* Find the inorder successor */
-      jsw_avlnode_t *heir = it->link[1];
+      avlnode_t *heir = it->link[1];
       void *save;
 
       /* Save this path too */
       upd[top] = 1;
       up[top++] = it;
 
-      while ( heir->link[0] != NULL ) {
+      while (heir->link[0] != NULL) {
         upd[top] = 0;
         up[top++] = heir;
         heir = heir->link[0];
@@ -307,23 +302,23 @@ int jsw_avlerase ( jsw_avltree_t *tree, void *data )
       /* Unlink successor and fix parent */
       up[top - 1]->link[up[top - 1] == it] = heir->link[1];
 
-      tree->rel ( heir->data );
-      free ( heir );
+      tree->rel(heir->data);
+      free(heir);
     }
 
     /* Walk back up the search path */
-    while ( --top >= 0 && !done ) {
+    while (--top >= 0 && !done) {
       /* Update balance factors */
       up[top]->balance += upd[top] != 0 ? -1 : +1;
 
       /* Terminate or rebalance as necessary */
-      if ( abs ( up[top]->balance ) == 1 )
+      if (abs(up[top]->balance) == 1)
         break;
-      else if ( abs ( up[top]->balance ) > 1 ) {
-        jsw_remove_balance ( up[top], upd[top], done );
+      else if (abs(up[top]->balance) > 1) {
+        remove_balance(up[top], upd[top], done);
 
         /* Fix parent */
-        if ( top != 0 )
+        if (top != 0)
           up[top - 1]->link[upd[top - 1]] = up[top];
         else
           tree->root = up[0];
@@ -336,34 +331,34 @@ int jsw_avlerase ( jsw_avltree_t *tree, void *data )
   return 1;
 }
 
-size_t jsw_avlsize ( jsw_avltree_t *tree )
+size_t avlsize(avltree_t *tree)
 {
   return tree->size;
 }
 
-jsw_avltrav_t *jsw_avltnew ( void )
+avltrav_t *avltnew(void)
 {
-  return malloc ( sizeof ( jsw_avltrav_t ) );
+  return malloc(sizeof(avltrav_t));
 }
 
-void jsw_avltdelete ( jsw_avltrav_t *trav )
+void avltdelete(avltrav_t *trav)
 {
-  free ( trav );
+  free(trav);
 }
 
 /*
   First step in traversal,
   handles min and max
 */
-static void *start ( jsw_avltrav_t *trav, jsw_avltree_t *tree, int dir )
+static void* start(avltrav_t *trav, avltree_t *tree, int dir)
 {
   trav->tree = tree;
   trav->it = tree->root;
   trav->top = 0;
 
   /* Build a path to work with */
-  if ( trav->it != NULL ) {
-    while ( trav->it->link[dir] != NULL ) {
+  if (trav->it != NULL) {
+    while (trav->it->link[dir] != NULL) {
       trav->path[trav->top++] = trav->it;
       trav->it = trav->it->link[dir];
     }
@@ -376,52 +371,52 @@ static void *start ( jsw_avltrav_t *trav, jsw_avltree_t *tree, int dir )
   Subsequent traversal steps,
   handles ascending and descending
 */
-static void *move ( jsw_avltrav_t *trav, int dir )
+static void* move(avltrav_t *trav, int dir)
 {
-  if ( trav->it->link[dir] != NULL ) {
+  if (trav->it->link[dir] != NULL) {
     /* Continue down this branch */
     trav->path[trav->top++] = trav->it;
     trav->it = trav->it->link[dir];
 
-    while ( trav->it->link[!dir] != NULL ) {
+    while (trav->it->link[!dir] != NULL) {
       trav->path[trav->top++] = trav->it;
       trav->it = trav->it->link[!dir];
     }
   }
   else {
     /* Move to the next branch */
-    jsw_avlnode_t *last;
+    avlnode_t *last;
 
     do {
-      if ( trav->top == 0 ) {
+      if (trav->top == 0) {
         trav->it = NULL;
         break;
       }
 
       last = trav->it;
       trav->it = trav->path[--trav->top];
-    } while ( last == trav->it->link[dir] );
+    } while (last == trav->it->link[dir]);
   }
 
   return trav->it == NULL ? NULL : trav->it->data;
 }
 
-void *jsw_avltfirst ( jsw_avltrav_t *trav, jsw_avltree_t *tree )
+void* avltfirst(avltrav_t *trav, avltree_t *tree)
 {
-  return start ( trav, tree, 0 ); /* Min value */
+  return start(trav, tree, 0); /* Min value */
 }
 
-void *jsw_avltlast ( jsw_avltrav_t *trav, jsw_avltree_t *tree )
+void* avltlast(avltrav_t *trav, avltree_t *tree)
 {
-  return start ( trav, tree, 1 ); /* Max value */
+  return start(trav, tree, 1); /* Max value */
 }
 
-void *jsw_avltnext ( jsw_avltrav_t *trav )
+void* avltnext(avltrav_t *trav)
 {
-  return move ( trav, 1 ); /* Toward larger items */
+  return move(trav, 1); /* Toward larger items */
 }
 
-void *jsw_avltprev ( jsw_avltrav_t *trav )
+void* avltprev(avltrav_t *trav)
 {
-  return move ( trav, 0 ); /* Toward smaller items */
+  return move(trav, 0); /* Toward smaller items */
 }

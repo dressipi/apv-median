@@ -1,0 +1,20 @@
+# Makefile for CUnit test-suite
+
+OBJ = main.o tests.o tests_avltree.o
+RUBBISH += $(OBJ) suite *~
+CFLAGS += -I../src
+LDLIBS += -lapvmedian
+LDFLAGS += -L../src
+
+default: run
+
+include ../Common.mk
+
+run: suite
+	./suite -v
+
+suite: $(OBJ)
+	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o suite
+
+clean spotless:
+	$(RM) $(RUBBISH)
