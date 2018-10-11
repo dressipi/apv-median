@@ -10,6 +10,7 @@
 
 extern CU_TestInfo tests_avltree[];
 
-extern void test_avltree_null(void);
+extern void test_avltree_new_not_null(void);
+extern void test_avltree_new_empty(void);
 
 #endif
