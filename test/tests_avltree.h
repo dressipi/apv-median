@@ -17,5 +17,9 @@ extern void test_avltree_find_present(void);
 extern void test_avltree_find_absent(void);
 extern void test_avltree_erase_present(void);
 extern void test_avltree_erase_absent(void);
+extern void test_avltree_traverse_first(void);
+extern void test_avltree_traverse_last(void);
+extern void test_avltree_traverse_next(void);
+extern void test_avltree_traverse_prev(void);
 
 #endif

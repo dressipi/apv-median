@@ -7,6 +7,7 @@
 #include <avltree.h>
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "tests_avltree.h"
 
@@ -19,6 +20,10 @@ CU_TestInfo tests_avltree[] =
     {"search for value absent", test_avltree_find_absent},
     {"erase a value present", test_avltree_erase_present},
     {"erase a value absent", test_avltree_erase_absent},
+    {"traverse find first", test_avltree_traverse_first},
+    {"traverse find last", test_avltree_traverse_last},
+    {"traverse find next", test_avltree_traverse_next},
+    {"traverse find prev", test_avltree_traverse_prev},
     CU_TEST_INFO_NULL,
   };
 
@@ -140,5 +145,109 @@ extern void test_avltree_erase_absent(void)
   CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
   CU_ASSERT_EQUAL(avlsize(tree), 10);
 
+  avldelete(tree);
+}
+
+extern void test_avltree_traverse_first(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  avltrav_t *cursor = avltnew();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
+
+  int *found = avltfirst(cursor, tree);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(found);
+  CU_ASSERT_EQUAL_FATAL(*found, 0);
+
+  avltdelete(cursor);
+  avldelete(tree);
+}
+
+extern void test_avltree_traverse_last(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  avltrav_t *cursor = avltnew();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
+
+  int *found = avltlast(cursor, tree);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(found);
+  CU_ASSERT_EQUAL_FATAL(*found, 9);
+
+  avltdelete(cursor);
+  avldelete(tree);
+}
+
+extern void test_avltree_traverse_next(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  avltrav_t *cursor = avltnew();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
+
+  int *found = avltfirst(cursor, tree);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(found);
+  CU_ASSERT_EQUAL_FATAL(*found, 0);
+
+  int expected = 1;
+
+  do
+    {
+      found = avltnext(cursor);
+      if (found == NULL) break;
+      CU_ASSERT_EQUAL(*found, expected++);
+    }
+  while (true);
+
+  CU_ASSERT_EQUAL(expected, 10);
+
+  avltdelete(cursor);
+  avldelete(tree);
+}
+
+extern void test_avltree_traverse_prev(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  avltrav_t *cursor = avltnew();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
+
+  int *found = avltlast(cursor, tree);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(found);
+  CU_ASSERT_EQUAL_FATAL(*found, 9);
+
+  int expected = 8;
+
+  do
+    {
+      found = avltprev(cursor);
+      if (found == NULL) break;
+      CU_ASSERT_EQUAL(*found, expected--);
+    }
+  while (true);
+
+  CU_ASSERT_EQUAL(expected, -1);
+
+  avltdelete(cursor);
   avldelete(tree);
 }
