@@ -3,6 +3,7 @@
 
     > Created (Julienne Walker): June 17, 2003
     > Modified (Julienne Walker): September 24, 2005
+    > Modified (J.J. Green): 2018
 */
 
 #include "avltree.h"
@@ -65,6 +66,7 @@ static avlnode_t* rotate_double(avlnode_t *root, int dir)
 
   return save;
 }
+
 
 static void adjust_balance(avlnode_t *root, int dir, int bal)
 {
@@ -142,7 +144,7 @@ static avlnode_t* new_node(avltree_t *tree, void *data)
 {
   avlnode_t *rn;
 
-  if ((rn  = malloc(sizeof *rn)) == NULL)
+  if ((rn = malloc(sizeof *rn)) == NULL)
     return NULL;
 
   rn->balance = 0;
@@ -152,11 +154,12 @@ static avlnode_t* new_node(avltree_t *tree, void *data)
   return rn;
 }
 
-avltree_t* avlnew(cmp_f cmp, dup_f dup, rel_f rel)
-{
-  avltree_t *rt = malloc(sizeof *rt);
 
-  if (rt == NULL)
+extern avltree_t* avlnew(cmp_f cmp, dup_f dup, rel_f rel)
+{
+  avltree_t *rt;
+
+  if ((rt = malloc(sizeof *rt)) == NULL)
     return NULL;
 
   rt->root = NULL;
@@ -168,25 +171,27 @@ avltree_t* avlnew(cmp_f cmp, dup_f dup, rel_f rel)
   return rt;
 }
 
-void avldelete(avltree_t *tree)
-{
-  avlnode_t *it = tree->root;
-  avlnode_t *save;
 
-  /* Destruction by rotation */
-  while (it != NULL) {
-    if (it->link[0] == NULL) {
-      /* Remove node */
-      save = it->link[1];
-      tree->rel(it->data);
-      free(it);
-    }
-    else {
-      /* Rotate right */
-      save = it->link[0];
-      it->link[0] = save->link[1];
-      save->link[1] = it;
-    }
+extern void avldelete(avltree_t *tree)
+{
+  avlnode_t
+    *it = tree->root,
+    *save;
+
+  while (it != NULL)
+    {
+      if (it->link[0] == NULL)
+	{
+	  save = it->link[1];
+	  tree->rel(it->data);
+	  free(it);
+	}
+    else
+      {
+	save = it->link[0];
+	it->link[0] = save->link[1];
+	save->link[1] = it;
+      }
 
     it = save;
   }
@@ -194,260 +199,258 @@ void avldelete(avltree_t *tree)
   free(tree);
 }
 
-void* avlfind(avltree_t *tree, void *data)
+
+extern void* avlfind(avltree_t *tree, void *data)
 {
   avlnode_t *it = tree->root;
 
-  while (it != NULL) {
-    int cmp = tree->cmp(it->data, data);
+  while (it != NULL)
+    {
+      int cmp;
 
-    if (cmp == 0)
-      break;
+      if ((cmp = tree->cmp(it->data, data)) == 0)
+	break;
 
-    it = it->link[cmp < 0];
-  }
+      it = it->link[cmp < 0];
+    }
 
-  return it == NULL ? NULL : it->data;
+  return ((it == NULL) ? NULL : it->data);
 }
 
-int avlinsert(avltree_t *tree, void *data)
+
+extern int avlinsert(avltree_t *tree, void *data)
 {
-  /* Empty tree case */
-  if (tree->root == NULL) {
-    tree->root = new_node(tree, data);
-    if (tree->root == NULL)
-      return 0;
-  }
-  else {
-    avlnode_t head = {0}; /* Temporary tree root */
-    avlnode_t *s, *t;     /* Place to rebalance and parent */
-    avlnode_t *p, *q;     /* Iterator and save pointer */
-    int dir;
-
-    /* Set up false root to ease maintenance */
-    t = &head;
-    t->link[1] = tree->root;
-
-    /* Search down the tree, saving rebalance points */
-    for (s = p = t->link[1]; ; p = q) {
-      dir = tree->cmp(p->data, data) < 0;
-      q = p->link[dir];
-
-      if (q == NULL)
-        break;
-
-      if (q->balance != 0) {
-        t = p;
-        s = q;
-      }
+  if (tree->root == NULL)
+    {
+      if ((tree->root = new_node(tree, data)) == NULL)
+	return 0;
     }
+  else
+    {
+      avlnode_t	head = {0}, *s, *t, *p, *q;
+      int dir;
 
-    p->link[dir] = q = new_node(tree, data);
-    if (q == NULL)
-      return 0;
+      t = &head;
+      t->link[1] = tree->root;
 
-    /* Update balance factors */
-    for (p = s; p != q; p = p->link[dir]) {
-      dir = tree->cmp(p->data, data) < 0;
-      p->balance += dir == 0 ? -1 : +1;
+      for (s = p = t->link[1] ; ; p = q)
+	{
+	  dir = tree->cmp(p->data, data) < 0;
+
+	  if ((q = p->link[dir]) == NULL)
+	    break;
+
+	  if (q->balance != 0)
+	    {
+	      t = p;
+	      s = q;
+	    }
+	}
+
+      if ((p->link[dir] = q = new_node(tree, data)) == NULL)
+	return 0;
+
+      for (p = s ; p != q ; p = p->link[dir])
+	{
+	  dir = tree->cmp(p->data, data) < 0;
+	  p->balance += dir == 0 ? -1 : +1;
+	}
+
+      q = s;
+
+      if (abs(s->balance) > 1)
+	{
+	  dir = tree->cmp(s->data, data) < 0;
+	  s = insert_balance(s, dir);
+	}
+
+      if (q == head.link[1])
+	tree->root = s;
+      else
+	t->link[q == t->link[1]] = s;
     }
-
-    q = s; /* Save rebalance point for parent fix */
-
-    /* Rebalance if necessary */
-    if (abs(s->balance) > 1) {
-      dir = tree->cmp(s->data, data) < 0;
-      s = insert_balance(s, dir);
-    }
-
-    /* Fix parent */
-    if (q == head.link[1])
-      tree->root = s;
-    else
-      t->link[q == t->link[1]] = s;
-  }
 
   ++tree->size;
 
   return 1;
 }
 
-int avlerase(avltree_t *tree, void *data)
+
+extern int avlerase(avltree_t *tree, void *data)
 {
-  if (tree->root != NULL) {
-    avlnode_t *it, *up[HEIGHT_LIMIT];
-    int upd[HEIGHT_LIMIT], top = 0;
-    bool done = false;
+  if (tree->root != NULL)
+    {
+      avlnode_t *it, *up[HEIGHT_LIMIT];
+      int upd[HEIGHT_LIMIT], top = 0;
 
-    it = tree->root;
+      it = tree->root;
 
-    /* Search down tree and save path */
-    for (; ;) {
-      if (it == NULL)
-        return 0;
-      else if (tree->cmp(it->data, data) == 0)
-        break;
+      for ( ; ; )
+	{
+	  if (it == NULL)
+	    return 0;
+	  else if (tree->cmp(it->data, data) == 0)
+	    break;
 
-      /* Push direction and node onto stack */
-      upd[top] = tree->cmp(it->data, data) < 0;
-      up[top++] = it;
+	  upd[top] = tree->cmp(it->data, data) < 0;
+	  up[top++] = it;
 
-      it = it->link[upd[top - 1]];
-    }
-
-    /* Remove the node */
-    if (it->link[0] == NULL || it->link[1] == NULL) {
-      /* Which child is not null? */
-      int dir = it->link[0] == NULL;
-
-      /* Fix parent */
-      if (top != 0)
-        up[top - 1]->link[upd[top - 1]] = it->link[dir];
-      else
-        tree->root = it->link[dir];
-
-      tree->rel(it->data);
-      free(it);
-    }
-    else {
-      /* Find the inorder successor */
-      avlnode_t *heir = it->link[1];
-      void *save;
-
-      /* Save this path too */
-      upd[top] = 1;
-      up[top++] = it;
-
-      while (heir->link[0] != NULL) {
-        upd[top] = 0;
-        up[top++] = heir;
-        heir = heir->link[0];
-      }
-
-      /* Swap data */
-      save = it->data;
-      it->data = heir->data;
-      heir->data = save;
-
-      /* Unlink successor and fix parent */
-      up[top - 1]->link[up[top - 1] == it] = heir->link[1];
-
-      tree->rel(heir->data);
-      free(heir);
-    }
-
-    /* Walk back up the search path */
-    while (--top >= 0 && !done)
-      {
-	/* Update balance factors */
-	up[top]->balance += upd[top] != 0 ? -1 : +1;
-
-	/* Terminate or rebalance as necessary */
-	if (abs(up[top]->balance) == 1)
-	  break;
-	else if (abs(up[top]->balance) > 1) {
-	  up[top] = remove_balance(up[top], upd[top], &done);
-
-	  /* Fix parent */
-	  if (top != 0)
-	    up[top - 1]->link[upd[top - 1]] = up[top];
-	  else
-	    tree->root = up[0];
+	  it = it->link[upd[top - 1]];
 	}
-      }
 
-    --tree->size;
-  }
+      if ((it->link[0] == NULL) || (it->link[1] == NULL))
+	{
+	  int dir = it->link[0] == NULL;
+
+	  if (top != 0)
+	    up[top - 1]->link[upd[top - 1]] = it->link[dir];
+	  else
+	    tree->root = it->link[dir];
+
+	  tree->rel(it->data);
+	  free(it);
+	}
+      else
+	{
+	  avlnode_t *heir = it->link[1];
+	  void *save;
+
+	  upd[top] = 1;
+	  up[top++] = it;
+
+	  while (heir->link[0] != NULL)
+	    {
+	      upd[top] = 0;
+	      up[top++] = heir;
+	      heir = heir->link[0];
+	    }
+
+	  save = it->data;
+	  it->data = heir->data;
+	  heir->data = save;
+
+	  up[top - 1]->link[up[top - 1] == it] = heir->link[1];
+
+	  tree->rel(heir->data);
+	  free(heir);
+	}
+
+      bool done = false;
+
+      while (--top >= 0 && !done)
+	{
+	  up[top]->balance += upd[top] != 0 ? -1 : +1;
+
+	  if (abs(up[top]->balance) == 1)
+	    break;
+	  else if (abs(up[top]->balance) > 1) {
+	    up[top] = remove_balance(up[top], upd[top], &done);
+
+	    if (top != 0)
+	      up[top - 1]->link[upd[top - 1]] = up[top];
+	    else
+	      tree->root = up[0];
+	  }
+	}
+
+      --tree->size;
+    }
 
   return 1;
 }
 
-size_t avlsize(avltree_t *tree)
+
+extern size_t avlsize(avltree_t *tree)
 {
   return tree->size;
 }
 
-avltrav_t *avltnew(void)
+
+extern avltrav_t *avltnew(void)
 {
   return malloc(sizeof(avltrav_t));
 }
 
-void avltdelete(avltrav_t *trav)
+
+extern void avltdelete(avltrav_t *trav)
 {
   free(trav);
 }
 
-/*
-  First step in traversal,
-  handles min and max
-*/
+
 static void* start(avltrav_t *trav, avltree_t *tree, int dir)
 {
   trav->tree = tree;
   trav->it = tree->root;
   trav->top = 0;
 
-  /* Build a path to work with */
-  if (trav->it != NULL) {
-    while (trav->it->link[dir] != NULL) {
-      trav->path[trav->top++] = trav->it;
-      trav->it = trav->it->link[dir];
+  if (trav->it != NULL)
+    {
+      while (trav->it->link[dir] != NULL)
+	{
+	  trav->path[trav->top++] = trav->it;
+	  trav->it = trav->it->link[dir];
+	}
     }
-  }
 
-  return trav->it == NULL ? NULL : trav->it->data;
+  return ((trav->it == NULL) ? NULL : trav->it->data);
 }
 
-/*
-  Subsequent traversal steps,
-  handles ascending and descending
-*/
+
 static void* move(avltrav_t *trav, int dir)
 {
-  if (trav->it->link[dir] != NULL) {
-    /* Continue down this branch */
-    trav->path[trav->top++] = trav->it;
-    trav->it = trav->it->link[dir];
-
-    while (trav->it->link[!dir] != NULL) {
+  if (trav->it->link[dir] != NULL)
+    {
       trav->path[trav->top++] = trav->it;
-      trav->it = trav->it->link[!dir];
+      trav->it = trav->it->link[dir];
+
+      while (trav->it->link[!dir] != NULL)
+	{
+	  trav->path[trav->top++] = trav->it;
+	  trav->it = trav->it->link[!dir];
+	}
     }
-  }
-  else {
-    /* Move to the next branch */
-    avlnode_t *last;
+  else
+    {
+      avlnode_t *last;
 
-    do {
-      if (trav->top == 0) {
-        trav->it = NULL;
-        break;
-      }
+      do
+	{
+	  if (trav->top == 0)
+	    {
+	      trav->it = NULL;
+	      break;
+	    }
 
-      last = trav->it;
-      trav->it = trav->path[--trav->top];
-    } while (last == trav->it->link[dir]);
-  }
+	  last = trav->it;
+	  trav->it = trav->path[--trav->top];
+	}
+      while (last == trav->it->link[dir]);
+    }
 
-  return trav->it == NULL ? NULL : trav->it->data;
+  return ((trav->it == NULL) ? NULL : trav->it->data);
 }
 
-void* avltfirst(avltrav_t *trav, avltree_t *tree)
+
+extern void* avltfirst(avltrav_t *trav, avltree_t *tree)
 {
-  return start(trav, tree, 0); /* Min value */
+  return start(trav, tree, 0);
 }
 
-void* avltlast(avltrav_t *trav, avltree_t *tree)
+
+extern void* avltlast(avltrav_t *trav, avltree_t *tree)
 {
-  return start(trav, tree, 1); /* Max value */
+  return start(trav, tree, 1);
 }
 
-void* avltnext(avltrav_t *trav)
+
+extern void* avltnext(avltrav_t *trav)
 {
-  return move(trav, 1); /* Toward larger items */
+  return move(trav, 1);
 }
 
-void* avltprev(avltrav_t *trav)
+
+extern void* avltprev(avltrav_t *trav)
 {
-  return move(trav, 0); /* Toward smaller items */
+  return move(trav, 0);
 }
