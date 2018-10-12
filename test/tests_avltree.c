@@ -15,6 +15,8 @@ CU_TestInfo tests_avltree[] =
     {"new returns non-NULL", test_avltree_new_not_null},
     {"new has size zero", test_avltree_new_empty},
     {"insert modified count", test_avltree_insert_count},
+    {"search for value present", test_avltree_find_present},
+    {"search for value absent", test_avltree_find_absent},
     CU_TEST_INFO_NULL,
   };
 
@@ -67,5 +69,36 @@ extern void test_avltree_insert_count(void)
     CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
 
   CU_ASSERT_EQUAL(avlsize(tree), 10);
+  avldelete(tree);
+}
+
+extern void test_avltree_find_present(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
+
+  int
+    sought = 7,
+    found = *(int*)avlfind(tree, (void*)&sought);
+
+  CU_ASSERT_EQUAL(sought, found);
+  avldelete(tree);
+}
+
+extern void test_avltree_find_absent(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
+
+  int sought = 15;
+
+  CU_ASSERT_PTR_NULL(avlfind(tree, (void*)&sought));
+
   avldelete(tree);
 }
