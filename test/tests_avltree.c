@@ -73,7 +73,7 @@ extern void test_avltree_insert_count(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   CU_ASSERT_EQUAL(avlsize(tree), 10);
   avldelete(tree);
@@ -85,7 +85,7 @@ extern void test_avltree_find_present(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   int
     sought = 7,
@@ -101,7 +101,7 @@ extern void test_avltree_find_absent(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   int sought = 15;
 
@@ -116,13 +116,13 @@ extern void test_avltree_erase_present(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   int sought = 7;
 
   CU_ASSERT_PTR_NOT_NULL(avlfind(tree, &sought));
   CU_ASSERT_EQUAL(avlsize(tree), 10);
-  CU_ASSERT_EQUAL(avlerase(tree, &sought), 1);
+  CU_ASSERT_EQUAL(avlerase(tree, &sought), true);
   CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
   CU_ASSERT_EQUAL(avlsize(tree), 9);
 
@@ -135,13 +135,13 @@ extern void test_avltree_erase_absent(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   int sought = 15;
 
   CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
   CU_ASSERT_EQUAL(avlsize(tree), 10);
-  CU_ASSERT_EQUAL(avlerase(tree, &sought), 0);
+  CU_ASSERT_FALSE(avlerase(tree, &sought));
   CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
   CU_ASSERT_EQUAL(avlsize(tree), 10);
 
@@ -154,7 +154,7 @@ extern void test_avltree_traverse_first(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   avltrav_t *cursor = avltnew();
   CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
@@ -174,7 +174,7 @@ extern void test_avltree_traverse_last(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   avltrav_t *cursor = avltnew();
   CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
@@ -194,7 +194,7 @@ extern void test_avltree_traverse_next(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   avltrav_t *cursor = avltnew();
   CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);
@@ -226,7 +226,7 @@ extern void test_avltree_traverse_prev(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+    CU_ASSERT_TRUE_FATAL(avlinsert(tree, &i));
 
   avltrav_t *cursor = avltnew();
   CU_ASSERT_PTR_NOT_NULL_FATAL(cursor);

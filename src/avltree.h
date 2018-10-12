@@ -1,9 +1,9 @@
 /*
   AVL balanced tree library
 
-    > Created (Julienne Walker): June 17, 2003
-    > Modified (Julienne Walker): September 24, 2005
-    > Modified (J.J. Green, 2018)
+  - Created (Julienne Walker): June 17, 2003
+  - Modified (Julienne Walker): September 24, 2005
+  - Modified (J.J. Green, 2018)
 
   This code is in the public domain. Anyone may use it or change
   it in any way that they see fit. The author assumes no
@@ -19,6 +19,7 @@
 #define AVLTREE_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /* opaque types */
 
@@ -35,9 +36,9 @@ typedef void (*rel_f)(void *p);
 
 extern avltree_t *avlnew(cmp_f, dup_f, rel_f);
 extern void avldelete(avltree_t*);
-extern void *avlfind(avltree_t*, void*);
-extern int avlinsert(avltree_t*, void*);
-extern int avlerase(avltree_t*, void*);
+extern void* avlfind(avltree_t*, void*);
+extern bool avlinsert(avltree_t*, void*);
+extern bool avlerase(avltree_t*, void*);
 extern size_t avlsize(avltree_t*);
 
 /* traversal */

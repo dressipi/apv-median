@@ -1,9 +1,9 @@
 /*
   AVL balanced tree library
 
-    > Created (Julienne Walker): June 17, 2003
-    > Modified (Julienne Walker): September 24, 2005
-    > Modified (J.J. Green): 2018
+  - Created (Julienne Walker): June 17, 2003
+  - Modified (Julienne Walker): September 24, 2005
+  - Modified (J.J. Green): 2018
 */
 
 #include "avltree.h"
@@ -218,12 +218,12 @@ extern void* avlfind(avltree_t *tree, void *data)
 }
 
 
-extern int avlinsert(avltree_t *tree, void *data)
+extern bool avlinsert(avltree_t *tree, void *data)
 {
   if (tree->root == NULL)
     {
       if ((tree->root = new_node(tree, data)) == NULL)
-	return 0;
+	return false;
     }
   else
     {
@@ -248,7 +248,7 @@ extern int avlinsert(avltree_t *tree, void *data)
 	}
 
       if ((p->link[dir] = q = new_node(tree, data)) == NULL)
-	return 0;
+	return false;
 
       for (p = s ; p != q ; p = p->link[dir])
 	{
@@ -272,11 +272,11 @@ extern int avlinsert(avltree_t *tree, void *data)
 
   ++tree->size;
 
-  return 1;
+  return true;
 }
 
 
-extern int avlerase(avltree_t *tree, void *data)
+extern bool avlerase(avltree_t *tree, void *data)
 {
   if (tree->root != NULL)
     {
@@ -288,7 +288,7 @@ extern int avlerase(avltree_t *tree, void *data)
       for ( ; ; )
 	{
 	  if (it == NULL)
-	    return 0;
+	    return false;
 	  else if (tree->cmp(it->data, data) == 0)
 	    break;
 
@@ -356,7 +356,7 @@ extern int avlerase(avltree_t *tree, void *data)
       --tree->size;
     }
 
-  return 1;
+  return true;
 }
 
 
