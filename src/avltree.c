@@ -12,13 +12,17 @@
 #define HEIGHT_LIMIT 64
 #endif
 
-typedef struct avlnode {
+typedef struct avlnode_t avlnode_t;
+
+struct avlnode_t
+{
   int balance;
   void *data;
-  struct avlnode *link[2];
-} avlnode_t;
+  avlnode_t *link[2];
+};
 
-struct avltree {
+struct avltree_t
+{
   avlnode_t *root;
   cmp_f cmp;
   dup_f dup;
@@ -26,7 +30,8 @@ struct avltree {
   size_t size;
 };
 
-struct avltrav {
+struct avltrav_t
+{
   avltree_t *tree;
   avlnode_t *it;
   avlnode_t *path[HEIGHT_LIMIT];
@@ -35,7 +40,7 @@ struct avltrav {
 
 /* Two way single rotation */
 
-#define single(root,dir) do {         \
+#define single(root, dir) do {         \
   avlnode_t *save = root->link[!dir]; \
   root->link[!dir] = save->link[dir];     \
   save->link[dir] = root;                 \
@@ -44,7 +49,7 @@ struct avltrav {
 
 /* Two way double rotation */
 
-#define double(root,dir) do {                    \
+#define double(root, dir) do {                    \
   avlnode_t *save = root->link[!dir]->link[dir]; \
   root->link[!dir]->link[dir] = save->link[!dir];    \
   save->link[!dir] = root->link[!dir];               \
@@ -57,7 +62,7 @@ struct avltrav {
 
 /* Adjust balance before double rotation */
 
-#define adjust_balance(root,dir,bal) do { \
+#define adjust_balance(root, dir, bal) do { \
   avlnode_t *n = root->link[dir];         \
   avlnode_t *nn = n->link[!dir];          \
   if (nn->balance == 0)                     \
@@ -75,7 +80,7 @@ struct avltrav {
 
 /* Rebalance after insertion */
 
-#define insert_balance(root,dir) do {  \
+#define insert_balance(root, dir) do {  \
   avlnode_t *n = root->link[dir];      \
   int bal = dir == 0 ? -1 : +1;            \
   if (n->balance == bal) {               \
@@ -89,7 +94,8 @@ struct avltrav {
 } while (0)
 
 /* Rebalance after deletion */
-#define remove_balance(root,dir,done) do { \
+
+#define remove_balance(root, dir, done) do { \
   avlnode_t *n = root->link[!dir];         \
   int bal = dir == 0 ? -1 : +1;                \
   if (n->balance == -bal) {                  \
@@ -110,7 +116,7 @@ struct avltrav {
 
 static avlnode_t* new_node(avltree_t *tree, void *data)
 {
-  avlnode_t *rn = (avlnode_t *)malloc(sizeof *rn);
+  avlnode_t *rn = malloc(sizeof *rn);
 
   if (rn == NULL)
     return NULL;
@@ -124,7 +130,7 @@ static avlnode_t* new_node(avltree_t *tree, void *data)
 
 avltree_t* avlnew(cmp_f cmp, dup_f dup, rel_f rel)
 {
-  avltree_t *rt = (avltree_t *)malloc(sizeof *rt);
+  avltree_t *rt = malloc(sizeof *rt);
 
   if (rt == NULL)
     return NULL;

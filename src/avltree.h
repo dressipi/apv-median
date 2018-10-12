@@ -23,8 +23,8 @@
 
 /* Opaque types */
 
-typedef struct avltree avltree_t;
-typedef struct avltrav avltrav_t;
+typedef struct avltree_t avltree_t;
+typedef struct avltrav_t avltrav_t;
 
 /* User-defined item handling */
 
@@ -34,12 +34,12 @@ typedef void (*rel_f)(void *p);
 
 /* AVL tree functions */
 
-avltree_t *avlnew (cmp_f, dup_f, rel_f);
-void avldelete (avltree_t*);
-void *avlfind (avltree_t*, void*);
-int avlinsert (avltree_t*, void*);
-int avlerase (avltree_t*, void*);
-size_t avlsize (avltree_t*);
+avltree_t *avlnew(cmp_f, dup_f, rel_f);
+void avldelete(avltree_t*);
+void *avlfind(avltree_t*, void*);
+int avlinsert(avltree_t*, void*);
+int avlerase(avltree_t*, void*);
+size_t avlsize(avltree_t*);
 
 /* Traversal functions */
 
