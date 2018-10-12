@@ -6,7 +6,9 @@
 */
 
 #include "avltree.h"
+
 #include <stdlib.h>
+#include <stdbool.h>
 
 #ifndef HEIGHT_LIMIT
 #define HEIGHT_LIMIT 64
@@ -38,87 +40,109 @@ struct avltrav_t
   size_t top;
 };
 
-/* Two way single rotation */
 
-#define single(root, dir) do {         \
-  avlnode_t *save = root->link[!dir]; \
-  root->link[!dir] = save->link[dir];     \
-  save->link[dir] = root;                 \
-  root = save;                            \
-} while (0)
+static avlnode_t* rotate_single(avlnode_t *root, int dir)
+{
+  avlnode_t *save = root->link[!dir];
 
-/* Two way double rotation */
+  root->link[!dir] = save->link[dir];
+  save->link[dir] = root;
 
-#define double(root, dir) do {                    \
-  avlnode_t *save = root->link[!dir]->link[dir]; \
-  root->link[!dir]->link[dir] = save->link[!dir];    \
-  save->link[!dir] = root->link[!dir];               \
-  root->link[!dir] = save;                           \
-  save = root->link[!dir];                           \
-  root->link[!dir] = save->link[dir];                \
-  save->link[dir] = root;                            \
-  root = save;                                       \
-} while (0)
+  return save;
+}
 
-/* Adjust balance before double rotation */
 
-#define adjust_balance(root, dir, bal) do { \
-  avlnode_t *n = root->link[dir];         \
-  avlnode_t *nn = n->link[!dir];          \
-  if (nn->balance == 0)                     \
-    root->balance = n->balance = 0;           \
-  else if (nn->balance == bal) {            \
-    root->balance = -bal;                     \
-    n->balance = 0;                           \
-  }                                           \
-  else { /* nn->balance == -bal */            \
-    root->balance = 0;                        \
-    n->balance = bal;                         \
-  }                                           \
-  nn->balance = 0;                            \
-} while (0)
+static avlnode_t* rotate_double(avlnode_t *root, int dir)
+{
+  avlnode_t *save = root->link[!dir]->link[dir];
 
-/* Rebalance after insertion */
+  root->link[!dir]->link[dir] = save->link[!dir];
+  save->link[!dir] = root->link[!dir];
+  root->link[!dir] = save;
+  save = root->link[!dir];
+  root->link[!dir] = save->link[dir];
+  save->link[dir] = root;
 
-#define insert_balance(root, dir) do {  \
-  avlnode_t *n = root->link[dir];      \
-  int bal = dir == 0 ? -1 : +1;            \
-  if (n->balance == bal) {               \
-    root->balance = n->balance = 0;        \
-    single(root, !dir);             \
-  }                                        \
-  else { /* n->balance == -bal */          \
-    adjust_balance(root, dir, bal); \
-    double(root, !dir);             \
-  }                                        \
-} while (0)
+  return save;
+}
 
-/* Rebalance after deletion */
+static void adjust_balance(avlnode_t *root, int dir, int bal)
+{
+  avlnode_t
+    *n = root->link[dir],
+    *nn = n->link[!dir];
 
-#define remove_balance(root, dir, done) do { \
-  avlnode_t *n = root->link[!dir];         \
-  int bal = dir == 0 ? -1 : +1;                \
-  if (n->balance == -bal) {                  \
-    root->balance = n->balance = 0;            \
-    single(root, dir);                  \
-  }                                            \
-  else if (n->balance == bal) {              \
-    adjust_balance(root, !dir, -bal);   \
-    double(root, dir);                  \
-  }                                            \
-  else { /* n->balance == 0 */                 \
-    root->balance = -bal;                      \
-    n->balance = bal;                          \
-    single(root, dir);                  \
-    done = 1;                                  \
-  }                                            \
-} while (0)
+  if (nn->balance == 0)
+    {
+      root->balance = n->balance = 0;
+    }
+  else if (nn->balance == bal)
+    {
+      root->balance = -bal;
+      n->balance = 0;
+    }
+  else
+    {
+      root->balance = 0;
+      n->balance = bal;
+    }
+
+  nn->balance = 0;
+}
+
+
+static avlnode_t* insert_balance(avlnode_t *root, int dir)
+{
+  avlnode_t *n = root->link[dir];
+  int bal = (dir == 0 ? -1 : +1);
+
+  if (n->balance == bal)
+    {
+      root->balance = n->balance = 0;
+
+      return rotate_single(root, !dir);
+    }
+  else
+    {
+      adjust_balance(root, dir, bal);
+
+      return rotate_double(root, !dir);
+    }
+}
+
+
+static avlnode_t* remove_balance(avlnode_t *root, int dir, bool *done)
+{
+  avlnode_t *n = root->link[!dir];
+  int bal = (dir == 0 ? -1 : +1);
+
+  if (n->balance == -bal)
+    {
+      root->balance = n->balance = 0;
+
+      return rotate_single(root, dir);
+    }
+
+  if (n->balance == bal)
+    {
+      adjust_balance(root, !dir, -bal);
+
+      return rotate_double(root, dir);
+    }
+
+  root->balance = -bal;
+  n->balance = bal;
+  *done = true;
+
+  return rotate_single(root, dir);
+}
+
 
 static avlnode_t* new_node(avltree_t *tree, void *data)
 {
-  avlnode_t *rn = malloc(sizeof *rn);
+  avlnode_t *rn;
 
-  if (rn == NULL)
+  if ((rn  = malloc(sizeof *rn)) == NULL)
     return NULL;
 
   rn->balance = 0;
@@ -233,7 +257,7 @@ int avlinsert(avltree_t *tree, void *data)
     /* Rebalance if necessary */
     if (abs(s->balance) > 1) {
       dir = tree->cmp(s->data, data) < 0;
-      insert_balance(s, dir);
+      s = insert_balance(s, dir);
     }
 
     /* Fix parent */
@@ -253,7 +277,7 @@ int avlerase(avltree_t *tree, void *data)
   if (tree->root != NULL) {
     avlnode_t *it, *up[HEIGHT_LIMIT];
     int upd[HEIGHT_LIMIT], top = 0;
-    int done = 0;
+    bool done = false;
 
     it = tree->root;
 
@@ -313,23 +337,24 @@ int avlerase(avltree_t *tree, void *data)
     }
 
     /* Walk back up the search path */
-    while (--top >= 0 && !done) {
-      /* Update balance factors */
-      up[top]->balance += upd[top] != 0 ? -1 : +1;
+    while (--top >= 0 && !done)
+      {
+	/* Update balance factors */
+	up[top]->balance += upd[top] != 0 ? -1 : +1;
 
-      /* Terminate or rebalance as necessary */
-      if (abs(up[top]->balance) == 1)
-        break;
-      else if (abs(up[top]->balance) > 1) {
-        remove_balance(up[top], upd[top], done);
+	/* Terminate or rebalance as necessary */
+	if (abs(up[top]->balance) == 1)
+	  break;
+	else if (abs(up[top]->balance) > 1) {
+	  up[top] = remove_balance(up[top], upd[top], &done);
 
-        /* Fix parent */
-        if (top != 0)
-          up[top - 1]->link[upd[top - 1]] = up[top];
-        else
-          tree->root = up[0];
+	  /* Fix parent */
+	  if (top != 0)
+	    up[top - 1]->link[upd[top - 1]] = up[top];
+	  else
+	    tree->root = up[0];
+	}
       }
-    }
 
     --tree->size;
   }
