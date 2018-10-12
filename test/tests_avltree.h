@@ -15,5 +15,7 @@ extern void test_avltree_new_empty(void);
 extern void test_avltree_insert_count(void);
 extern void test_avltree_find_present(void);
 extern void test_avltree_find_absent(void);
+extern void test_avltree_erase_present(void);
+extern void test_avltree_erase_absent(void);
 
 #endif

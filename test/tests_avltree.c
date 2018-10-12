@@ -17,6 +17,8 @@ CU_TestInfo tests_avltree[] =
     {"insert modified count", test_avltree_insert_count},
     {"search for value present", test_avltree_find_present},
     {"search for value absent", test_avltree_find_absent},
+    {"erase a value present", test_avltree_erase_present},
+    {"erase a value absent", test_avltree_erase_absent},
     CU_TEST_INFO_NULL,
   };
 
@@ -66,7 +68,7 @@ extern void test_avltree_insert_count(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
 
   CU_ASSERT_EQUAL(avlsize(tree), 10);
   avldelete(tree);
@@ -78,11 +80,11 @@ extern void test_avltree_find_present(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
 
   int
     sought = 7,
-    found = *(int*)avlfind(tree, (void*)&sought);
+    found = *(int*)avlfind(tree, &sought);
 
   CU_ASSERT_EQUAL(sought, found);
   avldelete(tree);
@@ -94,11 +96,49 @@ extern void test_avltree_find_absent(void)
   CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
 
   for (int i = 0 ; i < 10 ; i++)
-    CU_ASSERT_EQUAL(avlinsert(tree, (void*)&i), 1);
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
 
   int sought = 15;
 
-  CU_ASSERT_PTR_NULL(avlfind(tree, (void*)&sought));
+  CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
+
+  avldelete(tree);
+}
+
+extern void test_avltree_erase_present(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  int sought = 7;
+
+  CU_ASSERT_PTR_NOT_NULL(avlfind(tree, &sought));
+  CU_ASSERT_EQUAL(avlsize(tree), 10);
+  CU_ASSERT_EQUAL(avlerase(tree, &sought), 1);
+  CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
+  CU_ASSERT_EQUAL(avlsize(tree), 9);
+
+  avldelete(tree);
+}
+
+extern void test_avltree_erase_absent(void)
+{
+  avltree_t *tree = avlnew(cmp, dup, free);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(tree);
+
+  for (int i = 0 ; i < 10 ; i++)
+    CU_ASSERT_EQUAL_FATAL(avlinsert(tree, &i), 1);
+
+  int sought = 15;
+
+  CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
+  CU_ASSERT_EQUAL(avlsize(tree), 10);
+  CU_ASSERT_EQUAL(avlerase(tree, &sought), 0);
+  CU_ASSERT_PTR_NULL(avlfind(tree, &sought));
+  CU_ASSERT_EQUAL(avlsize(tree), 10);
 
   avldelete(tree);
 }
