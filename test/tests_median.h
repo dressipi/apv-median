@@ -12,5 +12,6 @@ extern CU_TestInfo tests_median[];
 
 extern void test_median_new_non_null(void);
 extern void test_median_new_zero(void);
+extern void test_median_add(void);
 
 #endif

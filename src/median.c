@@ -74,3 +74,9 @@ extern void histogram_destroy(histogram_t *hist)
   avldelete(hist->tree);
   free(hist);
 }
+
+
+extern int histogram_add(histogram_t *hist, double t)
+{
+  return 0;
+}

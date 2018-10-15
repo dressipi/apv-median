@@ -13,5 +13,6 @@ typedef struct histogram_t histogram_t;
 
 extern histogram_t* histogram_new(size_t);
 extern void histogram_destroy(histogram_t*);
+extern int histogram_add(histogram_t*, double);
 
 #endif
