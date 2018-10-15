@@ -32,6 +32,7 @@ static int bin_cmp(const void *b1, const void *b2)
   return 0;
 }
 
+
 static void* bin_dup(void *b)
 {
   bin_t *bdup;
@@ -42,7 +43,8 @@ static void* bin_dup(void *b)
   return memcpy(bdup, b, sizeof(bin_t));
 }
 
-extern histogram_t* new_histogram(size_t n)
+
+extern histogram_t* histogram_new(size_t n)
 {
   histogram_t *hist;
 
@@ -62,4 +64,11 @@ extern histogram_t* new_histogram(size_t n)
     }
 
   return NULL;
+}
+
+
+extern void histogram_destroy(histogram_t *hist)
+{
+  avldelete(hist->tree);
+  free(hist);
 }
