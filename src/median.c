@@ -78,5 +78,22 @@ extern void histogram_destroy(histogram_t *hist)
 
 extern int histogram_add(histogram_t *hist, double t)
 {
+  bin_t
+    b = { .count = 1, .max = t },
+    *pb = avlfind(hist->tree, &b);
+
+  if (pb == NULL)
+    {
+      if (! avlinsert(hist->tree, &b)) return 1;
+    }
+  else
+    {
+      pb->count++;
+    }
+
+  if (avlsize(hist->tree) >= hist->n)
+    {
+    }
+
   return 0;
 }
