@@ -48,6 +48,8 @@ extern histogram_t* histogram_new(size_t n)
 {
   histogram_t *hist;
 
+  if (n == 0) return NULL;
+
   if ((hist = malloc(sizeof(histogram_t))) != NULL)
     {
       avltree_t *tree;

@@ -9,5 +9,20 @@
 
 CU_TestInfo tests_median[] =
   {
+    {"histogram_new non-NULL for positive n", test_median_new_non_null},
+    {"histogram_new NULL for zero n", test_median_new_zero},
     CU_TEST_INFO_NULL,
   };
+
+extern void test_median_new_non_null(void)
+{
+  histogram_t *hist = histogram_new(5);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+  histogram_destroy(hist);
+}
+
+extern void test_median_new_zero(void)
+{
+  histogram_t *hist = histogram_new(0);
+  CU_ASSERT_PTR_NULL(hist);
+}
