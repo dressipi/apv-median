@@ -20,6 +20,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /* opaque types */
 
@@ -40,6 +41,7 @@ extern void* avlfind(avltree_t*, void*);
 extern bool avlinsert(avltree_t*, void*);
 extern bool avlerase(avltree_t*, void*);
 extern size_t avlsize(avltree_t*);
+extern void avliter(avltree_t*, void (*)(void*, void*), void*);
 
 /* traversal */
 

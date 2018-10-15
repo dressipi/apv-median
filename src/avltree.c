@@ -366,6 +366,18 @@ extern size_t avlsize(avltree_t *tree)
 }
 
 
+extern void avliter(avltree_t *tree, void (*f)(void*, void*), void *opt)
+{
+  avltrav_t *cursor = avltnew();
+  void *data;
+
+  for (data = avltfirst(cursor, tree) ;
+       data ;
+       data = avltnext(cursor))
+    f(data, opt);
+}
+
+
 extern avltrav_t *avltnew(void)
 {
   return malloc(sizeof(avltrav_t));
