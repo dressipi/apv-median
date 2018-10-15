@@ -1,5 +1,5 @@
 LIB = libapvmedian.a
-OBJ = avltree.o
+OBJ = avltree.o median.o
 
 default : all
 
