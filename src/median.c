@@ -7,92 +7,40 @@
 #include <math.h>
 
 #include "median.h"
-#include "avltree.h"
 
 struct bin_t
 {
-  bin_t *prev;
   double max, count;
 };
 
 struct histogram_t
 {
-  size_t n;
+  size_t n, k;
+  bin_t *bins;
   double total;
-  avltree_t *tree;
 };
-
-
-static int bin_cmp1(const void *b1, const void *b2)
-{
-  double
-    max1 = ((bin_t*)b1)->max,
-    max2 = ((bin_t*)b2)->max;
-
-  if (max1 > max2) return 1;
-  if (max1 < max2) return -1;
-  return 0;
-}
-
-static int bin_cmp2(const void *b1, const void *b2)
-{
-  double
-    max1 = ((bin_t*)b1)->max,
-    max2 = ((bin_t*)b2)->max;
-
-  if (max1 >= max2)
-    {
-      /*
-	an important implemention detail for avltree is that the
-	comparison of node payload always uses the tree-node in
-	the first argument; by construction this will have a valid
-	or NULL prev pointer once we have completed initialisation.
-      */
-
-      bin_t *prev = ((bin_t*)b1)->prev;
-      double min1 = (prev ? prev->max : -INFINITY);
-
-      if (min1 < max2)
-	return 0;
-      else
-	return 1;
-    }
-  else
-    return -1;
-}
-
-
-static void* bin_dup(void *b)
-{
-  bin_t *bdup;
-
-  if ((bdup = malloc(sizeof(bin_t))) == NULL)
-    return NULL;
-
-  return memcpy(bdup, b, sizeof(bin_t));
-}
 
 
 extern histogram_t* histogram_new(size_t n)
 {
   histogram_t *hist;
 
-  if (n == 0) return NULL;
+  if (n == 0)
+    return NULL;
 
   if ((hist = malloc(sizeof(histogram_t))) != NULL)
     {
-      avltree_t *tree;
+      /* allocate for n + 1 bins */
 
-      if ((tree = avlnew(bin_cmp1, bin_dup, free)) != NULL)
+      if ((hist->bins = malloc((n + 1)*sizeof(bin_t))) != NULL)
 	{
 	  hist->n = n;
-	  hist->total = 0;
-	  hist->tree = tree;
+	  hist->k = 0;
 
 	  return hist;
 	}
-
-      free(hist);
+      else
+	free(hist);
     }
 
   return NULL;
@@ -101,8 +49,48 @@ extern histogram_t* histogram_new(size_t n)
 
 extern void histogram_destroy(histogram_t *hist)
 {
-  avldelete(hist->tree);
+  free(hist->bins);
   free(hist);
+}
+
+static int maxent(histogram_t *hist)
+{
+  bin_t *bins = hist->bins;
+  size_t n = hist->n, jmax = 0;
+  double dEmax = -INFINITY;
+
+  /*
+  for (size_t i = 0 ; i <= n ; i++)
+    printf("| %f, %f\n", bins[i].max, bins[i].count);
+  */
+
+  for (size_t i = 0 ; i < n ; i++)
+    {
+      double
+	c = bins[i].count + bins[i+1].count,
+	dE = -c * log(c);
+
+      if (dE > dEmax)
+	{
+	  jmax = i;
+	  dEmax = dE;
+	}
+
+      //printf("%i %i %f %f\n", i, jmax, dEmax, dE);
+    }
+
+  //printf("<- %zi\n", jmax);
+
+  bins[jmax].count += bins[jmax+1].count;
+  bins[jmax].max = bins[jmax+1].max;
+  memmove(bins + jmax + 1, bins + jmax + 2, (n - jmax - 1) * sizeof(bin_t));
+
+  /*
+  for (size_t i = 0 ; i < n ; i++)
+    printf("| %f, %f\n", bins[i].max, bins[i].count);
+  */
+
+  return 0;
 }
 
 /*
@@ -115,114 +103,75 @@ extern void histogram_destroy(histogram_t *hist)
   data value its own bin.
 */
 
-static int histogram_add_init(histogram_t *hist, double t)
-{
-  bin_t
-    b = { .count = 1, .max = t, .prev = NULL },
-    *pb = avlfind(hist->tree, &b);
-
-  if (pb == NULL)
-    {
-      if (! avlinsert(hist->tree, &b))
-	return 1;
-    }
-  else
-    {
-      pb->count++;
-    }
-
-  hist->total++;
-
-  return 0;
-}
-
-static void bin_print(void *bin, void *opt)
-{
-  bin_t *b = bin;
-  FILE *st = opt;
-
-  fprintf(st, "%f %p\n", b->max, b->prev);
-}
-
-
-static void histogram_print(histogram_t *hist)
-{
-  avliter(hist->tree, bin_print, stdout);
-}
-
-
 extern int histogram_add(histogram_t *hist, double t)
 {
-  size_t n = hist->n;
+  bin_t *bins = hist->bins;
+  size_t k = hist->k, n = hist->n;
 
-  if (avlsize(hist->tree) < n)
+  //printf("-> %f\n", t);
+
+  if (k < n)
     {
-      int err = histogram_add_init(hist, t);
-      if (err)
-	return err;
-
-      if (avlsize(hist->tree) < n)
-	return 0;
-
+      /* histogram initialisation */
       /*
-	replace the initial avltree by one which uses
-	a different compare function, and which has valid
-	previous pointers
+      printf("[%zi, %zi, %f] ", k, n, t);
+      for (size_t i = 0 ; i < k ; i++)
+	printf("%f ", bins[i].max);
+      printf("\n");
       */
-
-      avltree_t *tree;
-      if ((tree = avlnew(bin_cmp2, bin_dup, free)) == NULL)
-	return 1;
-
-      avltrav_t *cursor;
-      if ((cursor = avltnew()) == NULL)
-	return 1;
-
-      bin_t *prev = NULL;
-
-      for (bin_t *bin = avltfirst(cursor, hist->tree) ;
-	   bin ;
-	   bin = avltnext(cursor))
+      for (size_t i = 0 ; i < k ; i++)
 	{
-	  bin->prev = prev;
-	  avlinsert(tree, bin);
-	  prev = bin;
+	  if (bins[i].max >= t)
+	    {
+	      if (bins[i].max == t)
+		{
+		  bins[i].count += 1.0;
+
+		  return 0;
+		}
+	      else
+		{
+		  memmove(bins + i + 1, bins + i, (k - i) * sizeof(bin_t));
+		  bins[i].max = t;
+		  bins[i].count = 1.0;
+		  hist->k++;
+
+		  return 0;
+		}
+	    }
 	}
 
-      avltdelete(cursor);
-
-      avldelete(hist->tree);
-      hist->tree = tree;
+      bins[k].max = t;
+      bins[k].count = 1.0;
+      hist->k++;
 
       return 0;
     }
 
-  /* post initialise */
+  /* histogram is intialised */
 
-  bin_t
-    target = { .max = t },
-    *found = avlfind(hist->tree, &target);
+  double min = 0.0;
 
-  if (found)
+  for (size_t i = 0 ; i < n ; i++)
     {
-      // FIXME
-    }
-  else
-    {
-      avltrav_t *cursor;
-      if ((cursor = avltnew()) == NULL)
-	return 1;
+      if (bins[i].max >= t)
+	{
+	  double
+	    c = bins[i].count,
+	    max = bins[i].max;
 
-      bin_t *last = avltlast(cursor, hist->tree);
+	  memmove(bins + i + 1, bins + i, (n - i) * sizeof(bin_t));
+	  bins[i].max = t;
+	  bins[i].count = c * (t - min) / (max - min) + 1.0;
 
-      target.prev = last;
-      target.count = 1.0;
+	  return maxent(hist);
+	}
 
-      if (! avlinsert(hist->tree, &target))
-	return 1;
+      min = bins[i].max;
     }
 
-  // histogram_print(hist);
+  bins[n].max = t;
+  bins[n].count = 1.0;
 
-  return 0;
+  return maxent(hist);
 }

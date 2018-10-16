@@ -14,7 +14,7 @@
   via macro for debugging during development //
 */
 
-#define NO_STDERR
+//#define NO_STDERR
 
 int main(int argc, char** argv)
 {
