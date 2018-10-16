@@ -6,7 +6,7 @@ default : all
 # include Common.mk
 
 CFLAGS += -Wall -std=c99 -O
-LDLIBS += -lm -lefence
+LDLIBS += -lm
 
 all: $(LIB)
 

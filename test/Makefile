@@ -3,7 +3,7 @@
 OBJ = main.o tests.o tests_avltree.o tests_median.o
 RUBBISH += $(OBJ) suite *~
 CFLAGS += -I../src
-LDLIBS += -lapvmedian -lm -lefence
+LDLIBS += -lapvmedian -lm
 LDFLAGS += -L../src
 
 default: run

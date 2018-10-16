@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "median.h"
 
@@ -86,7 +87,7 @@ static int maxent(histogram_t *hist)
   memmove(bins + jmax + 1, bins + jmax + 2, (n - jmax - 1) * sizeof(bin_t));
 
   /*
-  for (size_t i = 0 ; i < n ; i++)
+    for (size_t i = 0 ; i < n ; i++)
     printf("| %f, %f\n", bins[i].max, bins[i].count);
   */
 
@@ -174,4 +175,46 @@ extern int histogram_add(histogram_t *hist, double t)
   bins[n].count = 1.0;
 
   return maxent(hist);
+}
+
+extern int median(const histogram_t *hist, double *value)
+{
+  //printf("GAK\n");
+
+  size_t k = hist->k;
+  double total = 0.0;
+  bin_t *bins = hist->bins;
+
+  for (size_t i = 0 ; i < k ; i++)
+    {
+      //printf("%f\n", bins[i].count);
+      total += bins[i].count;
+    }
+
+  double
+    partial = 0.0,
+    min = 0.0;
+
+  //printf("k = %zi, total = %f\n", k, total);
+
+  for (size_t i = 0 ; i < k ; i++)
+    {
+      double
+	max = bins[i].max,
+	count = bins[i].count,
+	x = min + ((total / 2) - partial) * (max - min) / count;
+
+      //printf("%zi %f %f %f\n", i, min, max, x);
+
+      if (x < max)
+	{
+	  *value = x;
+	  return 0;
+	}
+
+      partial += count;
+      min = max;
+    }
+
+  return 1;
 }
