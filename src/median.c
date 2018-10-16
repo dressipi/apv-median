@@ -40,8 +40,6 @@ static int bin_cmp2(const void *b1, const void *b2)
     max1 = ((bin_t*)b1)->max,
     max2 = ((bin_t*)b2)->max;
 
-  printf("max1: %f, max2 %f\n", max1, max2);
-
   if (max1 >= max2)
     {
       /*
@@ -120,7 +118,7 @@ extern void histogram_destroy(histogram_t *hist)
 static int histogram_add_init(histogram_t *hist, double t)
 {
   bin_t
-    b = { .count = 1, .max = t },
+    b = { .count = 1, .max = t, .prev = NULL },
     *pb = avlfind(hist->tree, &b);
 
   if (pb == NULL)
@@ -201,13 +199,9 @@ extern int histogram_add(histogram_t *hist, double t)
 
   /* post initialise */
 
-  printf("search %f\n", t);
-
   bin_t
     target = { .max = t },
     *found = avlfind(hist->tree, &target);
-
-  printf("done\n");
 
   if (found)
     {
@@ -224,15 +218,11 @@ extern int histogram_add(histogram_t *hist, double t)
       target.prev = last;
       target.count = 1.0;
 
-      printf("insert tail %f\n", t);
-
       if (! avlinsert(hist->tree, &target))
 	return 1;
-
-      printf("done\n");
     }
 
-  histogram_print(hist);
+  // histogram_print(hist);
 
   return 0;
 }
