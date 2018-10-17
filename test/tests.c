@@ -11,6 +11,7 @@
 #include <assert.h>
 
 #include "tests_avltree.h"
+#include "tests_histogram.h"
 #include "tests_median.h"
 
 #include "cunit_compat.h"
@@ -22,6 +23,7 @@
 static CU_SuiteInfo suites[] =
   {
     ENTRY("avltree", tests_avltree),
+    ENTRY("histogram", tests_histogram),
     ENTRY("median", tests_median),
     CU_SUITE_INFO_NULL
   };
