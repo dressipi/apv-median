@@ -52,12 +52,10 @@ static int maxent(histogram_t *hist)
   bin_t *bins = hist->bins;
   size_t n = hist->n, jmax = 0;
   double dEmax = -INFINITY;
-
   /*
   for (size_t i = 0 ; i <= n ; i++)
     printf("| %f, %f\n", bins[i].max, bins[i].count);
   */
-
   for (size_t i = 0 ; i < n ; i++)
     {
       double
@@ -78,12 +76,16 @@ static int maxent(histogram_t *hist)
   bins[jmax].count += bins[jmax+1].count;
   bins[jmax].max = bins[jmax+1].max;
   memmove(bins + jmax + 1, bins + jmax + 2, (n - jmax - 1) * sizeof(bin_t));
-
   /*
-    for (size_t i = 0 ; i < n ; i++)
+  for (size_t i = 0 ; i < n ; i++)
     printf("| %f, %f\n", bins[i].max, bins[i].count);
-  */
 
+  double sum2 = 0.0;
+  for (size_t i = 0 ; i < n ; i++)
+    sum2 += bins[i].count;
+  printf("{%f}\n", sum2);
+  printf("\n");
+  */
   return 0;
 }
 
@@ -170,6 +172,7 @@ extern int histogram_add(histogram_t *hist, double t)
 	  memmove(bins + i + 1, bins + i, (n - i) * sizeof(bin_t));
 	  bins[i].max = t;
 	  bins[i].count = c * (t - min) / (max - min) + 1.0;
+	  bins[i+1].count = c * (max - t) / (max - min);
 
 	  return maxent(hist);
 	}

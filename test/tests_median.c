@@ -123,9 +123,7 @@ static double rand_double(void)
 
 extern void test_median_uniform(void)
 {
-  return;
-
-  size_t n = 240;
+  size_t n = 1000;
   double v[n];
 
   srand(42);
@@ -140,5 +138,5 @@ extern void test_median_uniform(void)
 
   //printf("\nexact: %f\n", exact);
 
-  test_median_array(n, v, 0.5, 1e-4);
+  test_median_array(n, v, exact, 1e-2);
 }
