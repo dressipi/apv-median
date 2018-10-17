@@ -15,6 +15,7 @@ struct histogram_t
   double total;
 };
 
+
 extern histogram_t* histogram_new(size_t n)
 {
   histogram_t *hist;
@@ -47,45 +48,56 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist);
 }
 
+/*
+  this isn't the entropy, but in the context used is proportional
+  to it, which is enough for our purposes
+*/
+
+static double entropy(double c)
+{
+  return -c * log(c);
+}
+
+/*
+  merge a pair of adjacent bins in such a way as to maximise
+  the entropy of the set of bins.  On entry, the histogram
+  has n+1 bins (a new one is added in histogra_add()), on exit
+  this will be reduced to n bins.
+*/
+
 static int maxent(histogram_t *hist)
 {
   bin_t *bins = hist->bins;
   size_t n = hist->n, jmax = 0;
   double dEmax = -INFINITY;
+
   /*
-  for (size_t i = 0 ; i <= n ; i++)
-    printf("| %f, %f\n", bins[i].max, bins[i].count);
+    Find the pair (at offsets jmax, jmax+1) whose merge
+    will maximise the total entropy, we inspect each pair
+    and calculate the change in entropy (dE) resulting
+    from the merge, then just choose the largest
   */
+
   for (size_t i = 0 ; i < n ; i++)
     {
       double
-	c = bins[i].count + bins[i+1].count,
-	dE = -c * log(c);
+	c1 = bins[i].count,
+	c2 = bins[i+1].count,
+	dE = entropy(c1 + c2) - entropy(c1) - entropy(c2);
 
       if (dE > dEmax)
 	{
 	  jmax = i;
 	  dEmax = dE;
 	}
-
-      //printf("%i %i %f %f\n", i, jmax, dEmax, dE);
     }
-
-  //printf("<- %zi\n", jmax);
 
   bins[jmax].count += bins[jmax+1].count;
   bins[jmax].max = bins[jmax+1].max;
-  memmove(bins + jmax + 1, bins + jmax + 2, (n - jmax - 1) * sizeof(bin_t));
-  /*
-  for (size_t i = 0 ; i < n ; i++)
-    printf("| %f, %f\n", bins[i].max, bins[i].count);
+  memmove(bins + jmax + 1,
+	  bins + jmax + 2,
+	  (n - jmax - 1) * sizeof(bin_t));
 
-  double sum2 = 0.0;
-  for (size_t i = 0 ; i < n ; i++)
-    sum2 += bins[i].count;
-  printf("{%f}\n", sum2);
-  printf("\n");
-  */
   return 0;
 }
 
@@ -102,32 +114,24 @@ extern bin_t* histogram_bins(const histogram_t *hist)
 }
 
 
-/*
-  The initialization of the histogram in the proposed method can be
-  achieved in the same manner as in the interpolated bins algorithm
-  introduced previously. To repeat, until the buffer is filled, i.e.
-  until the number of unique stream data points processed exceeds n,
-  the maximal entropy histogram is constructed by making each unique
-  data value the top boundary of a bin, thereby allocating each unique
-  data value its own bin.
-*/
-
 extern int histogram_add(histogram_t *hist, double t)
 {
   bin_t *bins = hist->bins;
   size_t k = hist->k, n = hist->n;
 
-  //printf("-> %f\n", t);
+  /*
+    The initialization of the histogram in the proposed method can be
+    achieved in the same manner as in the interpolated bins algorithm
+    introduced previously. To repeat, until the buffer is filled, i.e.
+    until the number of unique stream data points processed exceeds n,
+    the maximal entropy histogram is constructed by making each unique
+    data value the top boundary of a bin, thereby allocating each unique
+    data value its own bin.
+  */
 
   if (k < n)
     {
-      /* histogram initialisation */
-      /*
-      printf("[%zi, %zi, %f] ", k, n, t);
-      for (size_t i = 0 ; i < k ; i++)
-	printf("%f ", bins[i].max);
-      printf("\n");
-      */
+
       for (size_t i = 0 ; i < k ; i++)
 	{
 	  if (bins[i].max >= t)
@@ -157,7 +161,7 @@ extern int histogram_add(histogram_t *hist, double t)
       return 0;
     }
 
-  /* histogram is intialised */
+  /* histogram now intialised */
 
   double min = 0.0;
 
@@ -167,12 +171,15 @@ extern int histogram_add(histogram_t *hist, double t)
 	{
 	  double
 	    c = bins[i].count,
-	    max = bins[i].max;
+	    max = bins[i].max,
+	    alpha = (t - min) / (max - min);
+
+	  bins[i].count = c * (1 - alpha);
 
 	  memmove(bins + i + 1, bins + i, (n - i) * sizeof(bin_t));
+
 	  bins[i].max = t;
-	  bins[i].count = c * (t - min) / (max - min) + 1.0;
-	  bins[i+1].count = c * (max - t) / (max - min);
+	  bins[i].count = c * alpha + 1.0;
 
 	  return maxent(hist);
 	}

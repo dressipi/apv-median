@@ -123,7 +123,7 @@ static double rand_double(void)
 
 extern void test_median_uniform(void)
 {
-  size_t n = 1000;
+  size_t n = 1024;
   double v[n];
 
   srand(42);
