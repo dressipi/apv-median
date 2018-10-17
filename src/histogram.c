@@ -12,7 +12,7 @@ struct histogram_t
 {
   size_t n, k;
   bin_t *bins;
-  double total;
+  double total; // FIXME : use it or lose it
 };
 
 
@@ -131,7 +131,6 @@ extern int histogram_add(histogram_t *hist, double t)
 
   if (k < n)
     {
-
       for (size_t i = 0 ; i < k ; i++)
 	{
 	  if (bins[i].max >= t)
@@ -139,8 +138,6 @@ extern int histogram_add(histogram_t *hist, double t)
 	      if (bins[i].max == t)
 		{
 		  bins[i].count += 1.0;
-
-		  return 0;
 		}
 	      else
 		{
@@ -148,9 +145,8 @@ extern int histogram_add(histogram_t *hist, double t)
 		  bins[i].max = t;
 		  bins[i].count = 1.0;
 		  hist->k++;
-
-		  return 0;
 		}
+	      return 0;
 	    }
 	}
 
