@@ -17,7 +17,6 @@ extern int median(const histogram_t *hist, double *value)
   bin_t *bins = histogram_bins(hist);
   double total = 0.0;
 
-
   for (size_t i = 0 ; i < k ; i++)
     {
       //printf("%f\n", bins[i].count);
