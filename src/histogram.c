@@ -102,6 +102,8 @@ extern bin_t* histogram_bins(const histogram_t *hist)
       node = node->next;
     }
 
+  if (node != NULL) return NULL;
+
   return bins;
 }
 
@@ -172,9 +174,7 @@ extern int histogram_add(histogram_t *hist, double t)
       if (t <= hist->nodes->bin.max)
 	{
 	  if (t == hist->nodes->bin.max)
-	    {
-	      hist->nodes->bin.count += 1.0;
-	    }
+	    hist->nodes->bin.count += 1.0;
 	  else
 	    {
 	      node_t *node;
@@ -205,9 +205,7 @@ extern int histogram_add(histogram_t *hist, double t)
 	      if (t <= this->bin.max)
 		{
 		  if (t == this->bin.max)
-		    {
-		      this->bin.count += 1.0;
-		    }
+		    this->bin.count += 1.0;
 		  else
 		    {
 		      node_t *node;
