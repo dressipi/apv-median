@@ -108,8 +108,8 @@ extern bin_t* histogram_bins(const histogram_t *hist)
 /*
   merge a pair of adjacent bins in such a way as to maximise
   the entropy of the set of bins.  On entry, the histogram
-  has n+1 bins (a new one is added in histogra_add()), on exit
-  this will be reduced to n bins.
+  has n+1 nodes (a new one is added in histogra_add()), on exit
+  this will be reduced to n nodes.
 */
 
 static int merge(histogram_t *hist)
@@ -144,19 +144,10 @@ static int merge(histogram_t *hist)
   return 0;
 }
 
+
 extern int histogram_add(histogram_t *hist, double t)
 {
   size_t k = hist->k, n = hist->n;
-
-  /*
-    The initialization of the histogram in the proposed method can be
-    achieved in the same manner as in the interpolated bins algorithm
-    introduced previously. To repeat, until the buffer is filled, i.e.
-    until the number of unique stream data points processed exceeds n,
-    the maximal entropy histogram is constructed by making each unique
-    data value the top boundary of a bin, thereby allocating each unique
-    data value its own bin.
-  */
 
   if (k == 0)
     {
@@ -168,7 +159,15 @@ extern int histogram_add(histogram_t *hist, double t)
     }
   else if (k < n)
     {
-      /* initialisation */
+      /*
+	The initialization of the histogram in the proposed method can be
+	achieved in the same manner as in the interpolated bins algorithm
+	introduced previously. To repeat, until the buffer is filled, i.e.
+	until the number of unique stream data points processed exceeds n,
+	the maximal entropy histogram is constructed by making each unique
+	data value the top boundary of a bin, thereby allocating each unique
+	data value its own bin.
+      */
 
       if (t <= hist->nodes->bin.max)
 	{

@@ -5,7 +5,6 @@
 
 #include <string.h>
 #include <math.h>
-#include <stdio.h>
 
 #include "median.h"
 
@@ -18,9 +17,7 @@ extern int median(const histogram_t *hist, double *value)
   for (size_t i = 0 ; i < k ; i++)
     total += bins[i].count;
 
-  double
-    partial = 0.0,
-    min = 0.0;
+  double partial = 0.0, min = 0.0;
 
   for (size_t i = 0 ; i < k ; i++)
     {
