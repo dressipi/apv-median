@@ -16,4 +16,4 @@ originally by Julienne Walker (the source can be found at
 but modified to include unit tests and more-recent features of
 the C language.
 
-[![Build Status](https://ci.dressipi.com:3001/buildStatus/icon?job=apv-median)](https://ci.dressipi.com:3001/job/apv-median)
+[![Build Status](https://ci.dressipi.com:3001/job/apv-median/badge/icon)](https://ci.dressipi.com:3001/job/apv-median)
