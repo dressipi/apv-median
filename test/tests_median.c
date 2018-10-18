@@ -18,6 +18,9 @@ CU_TestInfo tests_median[] =
     CU_TEST_INFO_NULL,
   };
 
+
+/* helper functions */
+
 static int dbl_cmp(const void *a, const void *b)
 {
   const double *da = a, *db = b;
@@ -54,6 +57,7 @@ static void test_median_array(size_t n, const double *v, double x, double eps)
   CU_ASSERT_DOUBLE_EQUAL(m, x, eps);
 }
 
+
 /*
   For the input data 1, 2, 3, the algorithm generated
   a CDF which is y = x, for x in [0, 3], and we have
@@ -80,6 +84,7 @@ extern void test_median_small_permutations(void)
   for (size_t i = 0 ; i < 6 ; i++)
     test_median_array(3, v[i], 1.5, 1e-6);
 }
+
 
 /*
   Equal value input are the worst case for this algorithm,
@@ -109,6 +114,7 @@ extern void test_median_large_equal(void)
 {
   test_median_equal(40);
 }
+
 
 /* more realistic tests for random distibutions */
 
@@ -144,12 +150,14 @@ static void test_median_dist(double (*f)(void), double eps)
   test_median_array(n, v, exact, eps);
 }
 
+
 /* uniform in [0, 1] */
 
 extern void test_median_uniform(void)
 {
   test_median_dist(rand_uniform, 5e-3);
 }
+
 
 /* half-Gaussian */
 
