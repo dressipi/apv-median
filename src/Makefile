@@ -1,5 +1,5 @@
 LIB = libapvmedian.a
-OBJ = avltree.o histogram.o median.o
+OBJ = histogram.o median.o
 
 default : all
 
