@@ -125,6 +125,8 @@ static double rand_half_gaussian(void)
     R = sqrt(-log(u1)),
     t = M_PI * u2;
 
+  /* this is Box-Muller */
+
   return R * sin(t);
 }
 
