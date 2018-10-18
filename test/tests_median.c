@@ -14,6 +14,7 @@ CU_TestInfo tests_median[] =
     {"small equal", test_median_small_equal},
     {"large equal", test_median_large_equal},
     {"uniform in [0, 1]", test_median_uniform},
+    {"half-Gaussian", test_median_half_gaussian},
     CU_TEST_INFO_NULL,
   };
 
@@ -49,7 +50,6 @@ static void test_median_array(size_t n, const double *v, double x, double eps)
   double m = 0.0;
 
   CU_ASSERT_EQUAL(median(hist, &m), 0);
-  //printf("%e\n", m);
   CU_ASSERT_NOT_EQUAL(m, 0);
   CU_ASSERT_DOUBLE_EQUAL(m, x, eps);
 }
@@ -82,9 +82,10 @@ extern void test_median_small_permutations(void)
 }
 
 /*
-  Equal value input are the worst case for this
-  algorithm, since the retruned value will always
-  be exactly half the true medain
+  Equal value input are the worst case for this algorithm,
+  since the retruned value will always be exactly half the
+  true median; but a useful test to stress for edge-case
+  behaviour.
 */
 
 static void test_median_equal(size_t n)
@@ -106,37 +107,51 @@ extern void test_median_small_equal(void)
 
 extern void test_median_large_equal(void)
 {
-  test_median_equal(15);
+  test_median_equal(40);
 }
 
-/*
-  a more realistic case, we generate a set of doubles
-  in (0, 1] and check that the resulting median is near
-  1/2, we use srand(3) to set the random seed so the
-  result will be determinate
-*/
+/* more realistic tests for random distibutions */
 
-static double rand_double(void)
+static double rand_uniform(void)
 {
   return (double)rand() / RAND_MAX;
 }
 
-extern void test_median_uniform(void)
+static double rand_half_gaussian(void)
+{
+  double
+    u1 = rand_uniform(),
+    u2 = rand_uniform(),
+    R = sqrt(-log(u1)),
+    t = M_PI * u2;
+
+  return R * sin(t);
+}
+
+static void test_median_dist(double (*f)(void), double eps)
 {
   size_t n = 1024;
   double v[n];
 
   srand(42);
 
-  for (size_t i = 0 ; i < n ; i++)
-    {
-      v[i] = rand_double();
-      //printf("%f\n", v[i]);
-    }
+  for (size_t i = 0 ; i < n ; i++) v[i] = f();
 
   double exact = median_exact(n, v);
 
-  //printf("\nexact: %f\n", exact);
+  test_median_array(n, v, exact, eps);
+}
 
-  test_median_array(n, v, exact, 1e-2);
+/* uniform in [0, 1] */
+
+extern void test_median_uniform(void)
+{
+  test_median_dist(rand_uniform, 5e-3);
+}
+
+/* half-Gaussian */
+
+extern void test_median_half_gaussian(void)
+{
+  test_median_dist(rand_half_gaussian, 5e-3);
 }

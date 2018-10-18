@@ -12,7 +12,6 @@ struct histogram_t
 {
   size_t n, k;
   bin_t *bins;
-  double total; // FIXME : use it or lose it
 };
 
 

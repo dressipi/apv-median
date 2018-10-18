@@ -14,5 +14,6 @@ extern void test_median_small_permutations(void);
 extern void test_median_small_equal(void);
 extern void test_median_large_equal(void);
 extern void test_median_uniform(void);
+extern void test_median_half_gaussian(void);
 
 #endif
