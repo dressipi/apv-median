@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
-yum install libjanssen-devel -y
+sudo yum install libjanssen-devel -y
 ./configure --enable-tests
 make test
