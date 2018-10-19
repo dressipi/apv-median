@@ -44,7 +44,7 @@ dnl | posix stuff which should be on reasonable machines
 
 AC_CHECK_HEADER(getopt.h)
 AC_CHECK_HEADER(unistd.h)
-
+AC_CHECK_HEADERS(jansson.h)
 
 dnl | libraries
 

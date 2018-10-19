@@ -10,6 +10,14 @@
 #include "histogram.h"
 #include "node.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_JANSSON_H
+#include <jansson.h>
+#endif
+
 struct histogram_t
 {
   size_t n, k;
@@ -56,16 +64,64 @@ extern void histogram_destroy(histogram_t *hist)
   save to and load from JSON
 */
 
+#ifdef HAVE_JANSSON_H
+
+extern histogram_t* histogram_json_load_stream(FILE *st)
+{
+  return NULL;
+}
+
+extern histogram_t* histogram_json_load(const char *path)
+{
+  FILE *st;
+
+  if ((st = fopen(path, "r")) == NULL)
+    return NULL;
+
+  histogram_t *hist = histogram_json_load_stream(st);
+
+  if (fclose(st) == EOF)
+    {
+      if (hist != NULL) histogram_destroy(hist);
+      return NULL;
+    }
+
+  return hist;
+}
+
+extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
+{
+  return 1;
+}
+
+extern int histogram_json_save(const histogram_t* hist, const char *path)
+{
+  FILE *st;
+
+  if ((st = fopen(path, "w")) == NULL)
+    return 1;
+
+  int err = histogram_json_save_stream(hist, st);
+
+  if (fclose(st) == EOF)
+    return 1;
+
+  return err;
+}
+
+#else
+
 extern histogram_t* histogram_json_load(const char *path)
 {
   return NULL;
 }
 
-
 extern int histogram_json_save(const histogram_t* hist, const char *path)
 {
-  return 0;
+  return 1;
 }
+
+#endif
 
 /*
   it is convenient for the median calculation to dump

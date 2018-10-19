@@ -3443,6 +3443,17 @@ if test "x$ac_cv_header_unistd_h" = xyes; then :
 fi
 
 
+for ac_header in jansson.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "jansson.h" "ac_cv_header_jansson_h" "$ac_includes_default"
+if test "x$ac_cv_header_jansson_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_JANSSON_H 1
+_ACEOF
+
+fi
+
+done
 
 
 

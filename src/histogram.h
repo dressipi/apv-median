@@ -7,6 +7,7 @@
 #define HISTOGRAM_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "bin.h"
 
@@ -18,6 +19,8 @@ extern size_t histogram_num_bins(const histogram_t*);
 extern bin_t* histogram_bins(const histogram_t*);
 extern int histogram_add(histogram_t*, double);
 extern histogram_t* histogram_json_load(const char*);
+extern histogram_t* histogram_json_load_stream(FILE*);
 extern int histogram_json_save(const histogram_t*, const char*);
+extern int histogram_json_save_stream(const histogram_t*, FILE*);
 
 #endif
