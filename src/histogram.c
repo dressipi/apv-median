@@ -153,10 +153,7 @@ extern int histogram_add(histogram_t *hist, double t)
   else
     f = histogram_add_main;
 
-  if (f(hist, t) != 0)
-    return 1;
-
-  return 0;
+  return f(hist, t);
 }
 
 static int histogram_add_first(histogram_t *hist, double t)
@@ -191,6 +188,7 @@ static int histogram_add_init(histogram_t *hist, double t)
       else
 	{
 	  node_t *node;
+
 	  if ((node = node_new(t, hist->nodes)) == NULL)
 	    return 1;
 	  hist->nodes = node;
@@ -203,11 +201,12 @@ static int histogram_add_init(histogram_t *hist, double t)
 
       do
 	{
-	  node_t *this = last->next;
+	  node_t *this;
 
-	  if (this == NULL)
+	  if ((this = last->next) == NULL)
 	    {
 	      node_t *node;
+
 	      if ((node = node_new(t, NULL)) == NULL)
 		return 1;
 	      last->next = node;
@@ -222,6 +221,7 @@ static int histogram_add_init(histogram_t *hist, double t)
 	      else
 		{
 		  node_t *node;
+
 		  if ((node = node_new(t, this)) == NULL)
 		    return 1;
 		  last->next = node;
@@ -234,6 +234,7 @@ static int histogram_add_init(histogram_t *hist, double t)
 	}
       while (true);
     }
+
   return 0;
 }
 
@@ -246,7 +247,6 @@ static int histogram_add_main(histogram_t *hist, double t)
 	max = hist->nodes->bin.max,
 	min = 0.0,
 	alpha = (t - min) / (max - min);
-
       node_t *node;
 
       if ((node = node_new(t, hist->nodes)) == NULL)
@@ -264,11 +264,12 @@ static int histogram_add_main(histogram_t *hist, double t)
       do
 	{
 	  double min = last->bin.max;
-	  node_t *this = last->next;
+	  node_t *this;
 
-	  if (this == NULL)
+	  if ((this = last->next) == NULL)
 	    {
 	      node_t *node;
+
 	      if ((node = node_new(t, NULL)) == NULL)
 		return 1;
 	      last->next = node;
@@ -282,8 +283,8 @@ static int histogram_add_main(histogram_t *hist, double t)
 	      double
 		c = this->bin.count,
 		alpha = (t - min) / (max - min);
-
 	      node_t *node;
+
 	      if ((node = node_new(t, this)) == NULL)
 		return 1;
 
