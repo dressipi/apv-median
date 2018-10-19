@@ -140,10 +140,11 @@ extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
             {
 	      json_t
 		*version = json_string(VERSION),
-		*created = json_string(date_string());
+		*created = json_string(date_string()),
+		*creator = json_string(PACKAGE_NAME);
 
 	      if (
-		  (json_object_set_new(root, "creator", "apv-median") == 0) &&
+		  (json_object_set_new(root, "creator", creator) == 0) &&
                   (json_object_set_new(root, "version", version) == 0) &&
                   (json_object_set_new(root, "created", created) == 0) &&
                   (json_object_set(root, "nodes", objs) == 0)
