@@ -65,6 +65,11 @@ extern void histogram_destroy(histogram_t *hist)
 
 extern histogram_t* histogram_json_load_stream(FILE *st)
 {
+  json_t *json;
+
+  if ((json = json_loadf(st, 0, NULL)) == NULL)
+    return NULL;
+
   return NULL;
 }
 
