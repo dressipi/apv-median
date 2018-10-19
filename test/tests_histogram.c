@@ -4,8 +4,12 @@
 */
 
 #include <histogram.h>
-
 #include "tests_histogram.h"
+
+#include <stdbool.h>
+
+#include <sys/stat.h>
+#include <unistd.h>
 
 CU_TestInfo tests_histogram[] =
   {
@@ -14,6 +18,7 @@ CU_TestInfo tests_histogram[] =
     {"histogram_add distinct returns zero", test_histogram_add_distinct},
     {"histogram_add equal returns zero", test_histogram_add_equal},
     {"histogram_add post-initialise", test_histogram_post_init},
+    {"histogram_json_save create file", test_histogram_json_save_file},
     CU_TEST_INFO_NULL,
   };
 
@@ -75,6 +80,28 @@ extern void test_histogram_post_init(void)
   int res = histogram_add(hist, 5.5);
 
   CU_ASSERT_EQUAL(res, 0);
+
+  histogram_destroy(hist);
+}
+
+extern void test_histogram_json_save_file(void)
+{
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  for (size_t i = 0 ; i < 10 ; i++)
+    {
+      int res = histogram_add(hist, i);
+      CU_ASSERT_EQUAL_FATAL(res, 0);
+    }
+
+  char *path = "tmp/histogram-save.json";
+  struct stat stats;
+
+  CU_ASSERT_EQUAL(histogram_json_save(hist, path), 0);
+  CU_ASSERT_EQUAL(stat(path, &stats), 0);
+  CU_ASSERT_EQUAL(unlink(path), 0);
 
   histogram_destroy(hist);
 }

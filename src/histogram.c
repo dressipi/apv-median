@@ -6,16 +6,15 @@
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
+
+#include <jansson.h>
 
 #include "histogram.h"
 #include "node.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#ifdef HAVE_JANSSON_H
-#include <jansson.h>
 #endif
 
 struct histogram_t
@@ -64,8 +63,6 @@ extern void histogram_destroy(histogram_t *hist)
   save to and load from JSON
 */
 
-#ifdef HAVE_JANSSON_H
-
 extern histogram_t* histogram_json_load_stream(FILE *st)
 {
   return NULL;
@@ -89,9 +86,84 @@ extern histogram_t* histogram_json_load(const char *path)
   return hist;
 }
 
+static int node_print_json(json_t *objs, node_t *node)
+{
+  json_t *obj = json_object();
+
+  json_object_set_new(obj, "max", json_real(node->bin.max));
+  json_object_set_new(obj, "count", json_real(node->bin.count));
+
+  json_array_append(objs, obj);
+
+  return 0;
+}
+
+static int nodes_print_json(json_t *objs, node_t *nodes)
+{
+  if (nodes == NULL)
+    return 0;
+
+  return
+    node_print_json(objs, nodes) +
+    nodes_print_json(objs, nodes->next);
+}
+
+static const char* date_string(void)
+{
+  time_t t = time(NULL);
+  struct tm* bdt = gmtime(&t);
+  static char buffer[32];
+
+  snprintf(buffer, 32,
+           "%04d-%02d-%02dT%02d:%02d",
+           bdt->tm_year + 1900,
+           bdt->tm_mon + 1,
+           bdt->tm_mday,
+           bdt->tm_hour,
+           bdt->tm_min);
+
+  return buffer;
+}
+
 extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
 {
-  return 1;
+  json_t *objs;
+  int err = 0;
+
+  if ((objs = json_array()) != NULL)
+    {
+      if (nodes_print_json(objs, hist->nodes) == 0)
+        {
+          json_t *root;
+
+          if ((root = json_object()) != NULL)
+            {
+	      json_t
+		*version = json_string(VERSION),
+		*created = json_string(date_string());
+
+	      if (
+                  (json_object_set_new(root, "version", version) == 0) &&
+                  (json_object_set_new(root, "created", created) == 0) &&
+                  (json_object_set(root, "nodes", objs) == 0)
+                  )
+                {
+                 if (json_dumpf(root, st, JSON_INDENT(2)) != 0)
+		   err++;
+		}
+	      else
+		err++;
+	    }
+	  else
+	    err++;
+	}
+      else
+	err++;
+    }
+  else
+    err++;
+
+  return err;
 }
 
 extern int histogram_json_save(const histogram_t* hist, const char *path)
@@ -109,19 +181,6 @@ extern int histogram_json_save(const histogram_t* hist, const char *path)
   return err;
 }
 
-#else
-
-extern histogram_t* histogram_json_load(const char *path)
-{
-  return NULL;
-}
-
-extern int histogram_json_save(const histogram_t* hist, const char *path)
-{
-  return 1;
-}
-
-#endif
 
 /*
   it is convenient for the median calculation to dump
