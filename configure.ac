@@ -1,23 +1,17 @@
-AC_INIT([avpmedian],
-	[0.1],
+AC_INIT([libavpmedian],
+	[0.2],
   	[jim.green@dressipi.com],
-	[avpmedian],
+	[libavpmedian],
 	[https://dressipi.com/])
 
 dnl | defaults
 
 opt_enable_tests=no
-opt_enable_coverage=no
 
 AC_ARG_ENABLE(tests,
         AC_HELP_STRING([--enable-tests],
 	[unit testing support (default is no)]),
 	[opt_enable_tests=$enableval])
-
-AC_ARG_ENABLE(coverage,
-        AC_HELP_STRING([--enable-coverage],
-	[code coverage (default is no)]),
-        [opt_enable_coverage=$enableval])
 
 dnl | require a C99 compiler, gcc preferred
 
@@ -28,8 +22,8 @@ dnl | gcc-specifics, note clang sets __GCC__ so these options
 dnl | are active for clang
 
 if eval "test $GCC"; then
-   CFLAGS="$CFLAGS -Wall -Wextra -pthread"
-   LDFLAGS="$LDFLAGS -pthread"
+   CFLAGS="$CFLAGS -Wall -Wextra"
+   LDFLAGS="$LDFLAGS"
 fi
 
 dnl | configure setup
@@ -48,22 +42,8 @@ AC_HEADER_STDC
 
 dnl | posix stuff which should be on reasonable machines
 
-AC_CHECK_HEADER(fcntl.h)
 AC_CHECK_HEADER(getopt.h)
-AC_CHECK_HEADER(netdb.h)
-AC_CHECK_HEADER(netinet/in.h)
-AC_CHECK_HEADER(pthread.h)
-AC_CHECK_HEADER(signal.h)
-AC_CHECK_HEADER(sys/socket.h)
-AC_CHECK_HEADER(sys/stat.h)
-AC_CHECK_HEADER(sys/types.h)
 AC_CHECK_HEADER(unistd.h)
-
-dnl | library headers, may not be installed (in which case error)
-
-AC_CHECK_HEADER(pthread.h, [], AC_MSG_ERROR(pthread.h not found))
-
-AC_CHECK_LIB(pthread, pthread_create)
 
 dnl | tests option
 
@@ -92,13 +72,6 @@ if test $opt_enable_tests = yes; then
    AC_DEFINE_UNQUOTED(CUNIT_213,
      $cunit213,
      [Define if CUnit version 2.1-3 or later])
-fi
-
-dnl | coverage option
-
-if test $opt_enable_coverage = yes; then
-   CFLAGS="$CFLAGS --coverage"
-   LDFLAGS="$LDFLAGS --coverage"
 fi
 
 dnl | output

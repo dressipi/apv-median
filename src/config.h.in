@@ -9,9 +9,6 @@
 /* Define to 1 if you have the `cunit' library (-lcunit). */
 #undef HAVE_LIBCUNIT
 
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#undef HAVE_LIBPTHREAD
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
