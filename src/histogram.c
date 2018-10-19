@@ -53,6 +53,21 @@ extern void histogram_destroy(histogram_t *hist)
 
 
 /*
+  save to and load from JSON
+*/
+
+extern histogram_t* histogram_json_load(const char *path)
+{
+  return NULL;
+}
+
+
+extern int histogram_json_save(const histogram_t* hist, const char *path)
+{
+  return 0;
+}
+
+/*
   it is convenient for the median calculation to dump
   the histogram's bins to an array
 */
