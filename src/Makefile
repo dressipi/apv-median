@@ -3,9 +3,9 @@ OBJ = histogram.o median.o node.o
 
 default : all
 
-# include Common.mk
+include ../Common.mk
 
-CFLAGS += -Wall -std=c99 -O
+CFLAGS +=
 LDLIBS += -lm
 
 all: $(LIB)

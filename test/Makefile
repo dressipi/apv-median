@@ -1,6 +1,6 @@
 # Makefile for CUnit test-suite
 
-OBJ = main.o tests.o tests_histogram.o tests_median.o
+OBJ = main.o tests.o tests_histogram.o tests_median.o tests_node.o
 RUBBISH += $(OBJ) suite *~
 CFLAGS += -I../src
 LDLIBS += -lapvmedian -lm
