@@ -47,10 +47,10 @@ static void node_destroy(node_t *node)
 
 extern histogram_t* histogram_new(size_t n)
 {
-  histogram_t *hist;
-
   if (n == 0)
     return NULL;
+
+  histogram_t *hist;
 
   if ((hist = malloc(sizeof(histogram_t))) != NULL)
     {
@@ -76,15 +76,12 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist);
 }
 
+
 /*
-  this isn't the entropy, but in the context used is proportional
-  to it, which is enough for our purposes
+  it is convenient for the median calculation to dump
+  the histogram's bins to an array
 */
 
-static double entropy(double c)
-{
-  return -c * log(c);
-}
 
 extern size_t histogram_num_bins(const histogram_t *hist)
 {
@@ -106,6 +103,18 @@ extern bin_t* histogram_bins(const histogram_t *hist)
 
   return bins;
 }
+
+
+/*
+  this isn't the entropy, but in the context used is proportional
+  to it, which is enough for our purposes
+*/
+
+static double entropy(double c)
+{
+  return -c * log(c);
+}
+
 
 /*
   merge a pair of adjacent bins in such a way as to maximise
@@ -135,7 +144,10 @@ static int merge(histogram_t *hist)
       last = this;
     }
 
-  node_t *next = maxnode->next;
+  node_t *next;
+
+  if ((next = maxnode->next) == NULL)
+    return 1;
 
   maxnode->bin.count += next->bin.count;
   maxnode->bin.max = next->bin.max;
@@ -147,147 +159,169 @@ static int merge(histogram_t *hist)
 }
 
 
+/* add a bew value t to the histogram */
+
+static int histogram_add_first(histogram_t*, double);
+static int histogram_add_init(histogram_t*, double);
+static int histogram_add_main(histogram_t*, double);
+
 extern int histogram_add(histogram_t *hist, double t)
 {
   size_t k = hist->k, n = hist->n;
+  int (*f)(histogram_t*, double);
 
   if (k == 0)
-    {
-      node_t *node;
-      if ((node = node_new(t, NULL)) == NULL)
-	return 1;
-      hist->nodes = node;
-      hist->k++;
-    }
+    f = histogram_add_first;
   else if (k < n)
-    {
-      /*
-	The initialization of the histogram in the proposed method can be
-	achieved in the same manner as in the interpolated bins algorithm
-	introduced previously. To repeat, until the buffer is filled, i.e.
-	until the number of unique stream data points processed exceeds n,
-	the maximal entropy histogram is constructed by making each unique
-	data value the top boundary of a bin, thereby allocating each unique
-	data value its own bin.
-      */
+    f = histogram_add_init;
+  else
+    f = histogram_add_main;
 
-      if (t <= hist->nodes->bin.max)
-	{
-	  if (t == hist->nodes->bin.max)
-	    hist->nodes->bin.count += 1.0;
-	  else
-	    {
-	      node_t *node;
-	      if ((node = node_new(t, hist->nodes)) == NULL)
-		return 1;
-	      hist->nodes = node;
-	      hist->k++;
-	    }
-	}
+  if (f(hist, t) != 0)
+    return 1;
+
+  return 0;
+}
+
+static int histogram_add_first(histogram_t *hist, double t)
+{
+  node_t *node;
+
+  if ((node = node_new(t, NULL)) == NULL)
+    return 1;
+
+  hist->nodes = node;
+  hist->k++;
+
+  return 0;
+}
+
+/*
+  The initialization of the histogram in the proposed method can be
+  achieved in the same manner as in the interpolated bins algorithm
+  introduced previously. To repeat, until the buffer is filled, i.e.
+  until the number of unique stream data points processed exceeds n,
+  the maximal entropy histogram is constructed by making each unique
+  data value the top boundary of a bin, thereby allocating each unique
+  data value its own bin.
+*/
+
+static int histogram_add_init(histogram_t *hist, double t)
+{
+  if (t <= hist->nodes->bin.max)
+    {
+      if (t == hist->nodes->bin.max)
+	hist->nodes->bin.count += 1.0;
       else
 	{
-	  node_t *last = hist->nodes;
-
-	  do
-	    {
-	      node_t *this = last->next;
-
-	      if (this == NULL)
-		{
-		  node_t *node;
-		  if ((node = node_new(t, NULL)) == NULL)
-		    return 1;
-		  last->next = node;
-		  hist->k++;
-		  break;
-		}
-
-	      if (t <= this->bin.max)
-		{
-		  if (t == this->bin.max)
-		    this->bin.count += 1.0;
-		  else
-		    {
-		      node_t *node;
-		      if ((node = node_new(t, this)) == NULL)
-			return 1;
-		      last->next = node;
-		      hist->k++;
-		    }
-		  break;
-		}
-
-	      last = this;
-	    }
-	  while (true);
+	  node_t *node;
+	  if ((node = node_new(t, hist->nodes)) == NULL)
+	    return 1;
+	  hist->nodes = node;
+	  hist->k++;
 	}
     }
   else
     {
-      /* post initialisation */
+      node_t *last = hist->nodes;
 
-      if (t <= hist->nodes->bin.max)
+      do
 	{
-	  double
-	    c = hist->nodes->bin.count,
-	    max = hist->nodes->bin.max,
-	    min = 0.0,
-	    alpha = (t - min) / (max - min);
-	  node_t *node;
+	  node_t *this = last->next;
 
-	  if ((node = node_new(t, hist->nodes)) == NULL)
-	    return 1;
-
-	  node->bin.count = c * alpha + 1.0;
-	  node->next->bin.count = c * (1 - alpha);
-
-	  hist->nodes = node;
-	}
-      else
-	{
-	  node_t *last = hist->nodes;
-
-	  do
+	  if (this == NULL)
 	    {
-	      double min = last->bin.max;
-	      node_t *this = last->next;
+	      node_t *node;
+	      if ((node = node_new(t, NULL)) == NULL)
+		return 1;
+	      last->next = node;
+	      hist->k++;
+	      break;
+	    }
 
-	      if (this == NULL)
+	  if (t <= this->bin.max)
+	    {
+	      if (t == this->bin.max)
+		this->bin.count += 1.0;
+	      else
 		{
-		  node_t *node;
-		  if ((node = node_new(t, NULL)) == NULL)
-		    return 1;
-		  last->next = node;
-		  break;
-		}
-
-	      double max = this->bin.max;
-
-	      if (t <= max)
-		{
-		  double
-		    c = this->bin.count,
-		    alpha = (t - min) / (max - min);
-
 		  node_t *node;
 		  if ((node = node_new(t, this)) == NULL)
 		    return 1;
-
-		  node->bin.count = c * alpha + 1.0;
-		  node->next->bin.count = c * (1 - alpha);
-
 		  last->next = node;
-		  break;
+		  hist->k++;
 		}
-
-	      last = this;
+	      break;
 	    }
-	  while (true);
-	}
 
-      if (merge(hist) != 0)
+	  last = this;
+	}
+      while (true);
+    }
+  return 0;
+}
+
+static int histogram_add_main(histogram_t *hist, double t)
+{
+  if (t <= hist->nodes->bin.max)
+    {
+      double
+	c = hist->nodes->bin.count,
+	max = hist->nodes->bin.max,
+	min = 0.0,
+	alpha = (t - min) / (max - min);
+
+      node_t *node;
+
+      if ((node = node_new(t, hist->nodes)) == NULL)
 	return 1;
+
+      node->bin.count = c * alpha + 1.0;
+      node->next->bin.count = c * (1 - alpha);
+
+      hist->nodes = node;
+    }
+  else
+    {
+      node_t *last = hist->nodes;
+
+      do
+	{
+	  double min = last->bin.max;
+	  node_t *this = last->next;
+
+	  if (this == NULL)
+	    {
+	      node_t *node;
+	      if ((node = node_new(t, NULL)) == NULL)
+		return 1;
+	      last->next = node;
+	      break;
+	    }
+
+	  double max = this->bin.max;
+
+	  if (t <= max)
+	    {
+	      double
+		c = this->bin.count,
+		alpha = (t - min) / (max - min);
+
+	      node_t *node;
+	      if ((node = node_new(t, this)) == NULL)
+		return 1;
+
+	      node->bin.count = c * alpha + 1.0;
+	      node->next->bin.count = c * (1 - alpha);
+
+	      last->next = node;
+	      break;
+	    }
+
+	  last = this;
+	}
+      while (true);
     }
 
-  return 0;
+  return merge(hist);
 }
