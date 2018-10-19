@@ -44,11 +44,14 @@ dnl | posix stuff which should be on reasonable machines
 
 AC_CHECK_HEADER(getopt.h)
 AC_CHECK_HEADER(unistd.h)
-AC_CHECK_HEADERS(jansson.h)
+
+dnl | 3rd party headers
+
+AC_CHECK_HEADERS(jansson.h, [], [AC_MSG_ERROR(jansson.h not found)])
 
 dnl | libraries
 
-AC_CHECK_LIB(jansson, json_pack, [], AC_MSG_WARN(libjansson not found))
+AC_CHECK_LIB(jansson, json_pack, [], [AC_MSG_ERROR(libjansson not found)])
 
 dnl | tests option
 
