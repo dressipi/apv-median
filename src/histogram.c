@@ -58,17 +58,31 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist);
 }
 
-
 /*
   save to and load from JSON
 */
 
 extern histogram_t* histogram_json_load_stream(FILE *st)
 {
-  json_t *json;
+  json_t *root;
 
-  if ((json = json_loadf(st, 0, NULL)) == NULL)
+  if ((root = json_loadf(st, 0, NULL)) == NULL)
     return NULL;
+
+  json_t *array;
+
+  if ((array = json_object_get(root, "nodes")) == NULL)
+    return NULL;
+
+  for (sizt_t i = 0; i < json_array_size(array); i++)
+    {
+      json_t *item;
+
+      if ((item = json_array_get(root, i)) == NULL)
+	return NULL;
+
+      /* add item to hist */
+    }
 
   return NULL;
 }
