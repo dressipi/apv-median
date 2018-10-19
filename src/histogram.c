@@ -8,14 +8,7 @@
 #include <stdbool.h>
 
 #include "histogram.h"
-
-typedef struct node_t node_t;
-
-struct node_t
-{
-  bin_t bin;
-  node_t *next;
-};
+#include "node.h"
 
 struct histogram_t
 {
@@ -25,25 +18,7 @@ struct histogram_t
 };
 
 
-static node_t* node_new(double max, node_t *next)
-{
-  node_t *node;
-
-  if ((node = malloc(sizeof(node_t))) == NULL)
-    return NULL;
-
-  node->bin.max = max;
-  node->bin.count = 1.0;
-  node->next = next;
-
-  return node;
-}
-
-static void node_destroy(node_t *node)
-{
-  if (node) node_destroy(node->next);
-  free(node);
-}
+/* constructor / destructor */
 
 extern histogram_t* histogram_new(size_t n)
 {
@@ -82,7 +57,6 @@ extern void histogram_destroy(histogram_t *hist)
   the histogram's bins to an array
 */
 
-
 extern size_t histogram_num_bins(const histogram_t *hist)
 {
   return hist->k;
@@ -106,22 +80,13 @@ extern bin_t* histogram_bins(const histogram_t *hist)
 
 
 /*
-  this isn't the entropy, but in the context used is proportional
-  to it, which is enough for our purposes
-*/
-
-static double entropy(double c)
-{
-  return -c * log(c);
-}
-
-
-/*
   merge a pair of adjacent bins in such a way as to maximise
   the entropy of the set of bins.  On entry, the histogram
   has n+1 nodes (a new one is added in histogra_add()), on exit
   this will be reduced to n nodes.
 */
+
+static double entropy(double);
 
 static int merge(histogram_t *hist)
 {
@@ -156,6 +121,17 @@ static int merge(histogram_t *hist)
   free(next);
 
   return 0;
+}
+
+
+/*
+  this isn't the entropy, but in the context used is proportional
+  to it, which is enough for our purposes
+*/
+
+static double entropy(double c)
+{
+  return -c * log(c);
 }
 
 
