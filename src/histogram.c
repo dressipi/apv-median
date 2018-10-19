@@ -143,6 +143,7 @@ extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
 		*created = json_string(date_string());
 
 	      if (
+		  (json_object_set_new(root, "creator", "apv-median") == 0) &&
                   (json_object_set_new(root, "version", version) == 0) &&
                   (json_object_set_new(root, "created", created) == 0) &&
                   (json_object_set(root, "nodes", objs) == 0)
