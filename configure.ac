@@ -45,6 +45,11 @@ dnl | posix stuff which should be on reasonable machines
 AC_CHECK_HEADER(getopt.h)
 AC_CHECK_HEADER(unistd.h)
 
+
+dnl | libraries
+
+AC_CHECK_LIB(jansson, json_pack, [], AC_MSG_WARN(libjansson not found))
+
 dnl | tests option
 
 if test $opt_enable_tests = yes; then
