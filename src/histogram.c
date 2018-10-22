@@ -66,7 +66,23 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
 {
   json_t *root;
 
+
   if ((root = json_loadf(st, 0, NULL)) == NULL)
+    return NULL;
+
+  json_t *maxnodes;
+
+  if ((maxnodes = json_object_get(root, "maxnodes")) == NULL)
+    return NULL;
+
+  size_t n;
+
+  if ((n = json_integer_value(maxnodes)) == 0)
+    return NULL;
+
+  histogram_t *hist;
+
+  if ((hist = histogram_new(n)) == NULL)
     return NULL;
 
   json_t *array;
@@ -74,17 +90,38 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
   if ((array = json_object_get(root, "nodes")) == NULL)
     return NULL;
 
-  for (size_t i = 0; i < json_array_size(array); i++)
+  size_t k;
+
+  if ((k = json_array_size(array)) > n)
+    return NULL;
+
+  node_t *node = NULL, *next = NULL;
+
+  for (size_t i = 0; i < k ; i++)
     {
       json_t *item;
 
-      if ((item = json_array_get(root, i)) == NULL)
+      if ((item = json_array_get(array, k - 1 - i)) == NULL)
 	return NULL;
 
-      /* add item to hist */
+      double max, count;
+
+      if (json_unpack(item, "{s:f, s:f}", "max", &max, "count", &count) != 0)
+	return NULL;
+
+      if ((node = malloc(sizeof(node_t))) == NULL)
+	return NULL;
+
+      node->bin.max = max;
+      node->bin.count = count;
+      node->next = next;
+      next = node;
     }
 
-  return NULL;
+  hist->nodes = node;
+  hist->k = k;
+
+  return hist;
 }
 
 extern histogram_t* histogram_json_load(const char *path)

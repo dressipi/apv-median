@@ -4,6 +4,7 @@
 */
 
 #include <histogram.h>
+#include <median.h>
 #include "tests_histogram.h"
 
 #include <stdbool.h>
@@ -97,6 +98,11 @@ extern void test_histogram_json_save(void)
       CU_ASSERT_EQUAL_FATAL(res, 0);
     }
 
+  double m;
+
+  CU_ASSERT_EQUAL(median(hist, &m), 0);
+  CU_ASSERT_DOUBLE_EQUAL(m, 4.0, 1e-6);
+
   char *path = "tmp/histogram-save.json";
   struct stat stats;
 
@@ -111,10 +117,13 @@ extern void test_histogram_json_load(void)
 {
   char *path = "fixtures/histogram.json";
   histogram_t *hist = histogram_json_load(path);
-
-  return;
+  double m;
 
   CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  CU_ASSERT_EQUAL(histogram_num_bins(hist), 5);
+  CU_ASSERT_EQUAL(median(hist, &m), 0);
+  CU_ASSERT_DOUBLE_EQUAL(m, 4.0, 1e-6);
 
   histogram_destroy(hist);
 }
