@@ -1,7 +1,8 @@
 {
   "creator": "libavpmedian",
   "version": "0.2",
-  "created": "2018-10-19T15:59",
+  "created": "2018-10-22T09:30",
+  "maxnodes": 5,
   "nodes": [
     {
       "max": 1.0,
