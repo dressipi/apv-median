@@ -7,8 +7,8 @@ include $(ROOT)/Common.mk
 OBJ = main.o options.o
 RUBBISH += $(OBJ) dumper *~
 CFLAGS += -I$(ROOT)/src
-LDLIBS += -lapvmedian -ljansson -lm
 LDFLAGS += -L$(ROOT)/src
+LDLIBS := -lapvmedian -lm $(LDLIBS)
 
 dumper: $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o dumper

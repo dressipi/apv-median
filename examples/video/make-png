@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import json
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.random import normal
+from subprocess import Popen, PIPE
+
+n = 1024
+cmd = ['../dumper/dumper', '--bins', '32', '--directory', 'tmp']
+proc = Popen(cmd, stdin=PIPE)
+
+mu = 5.0
+sigma = 1.0
+for x in normal(mu, sigma, n):
+    proc.stdin.write("%e\n" % x)
+
+proc.stdin.close()
+
+while proc.returncode is None:
+    proc.poll()
+
+for i in range(n):
+    base_path = 'tmp/%08i' % i
+    json_path = '%s.json' % base_path
+    png_path = '%s.png' % base_path
+    with open(json_path) as stream:
+        print png_path
+        data = json.load(stream)
+        edges = np.array([0.0] + [node['max'] for node in data['nodes']])
+        widths = edges[1:] - edges[:-1]
+        counts = np.array([node['count'] for node in data['nodes']])
+        heights = counts / widths
+        plt.bar(edges[:-1], heights, widths, align='edge')
+        plt.savefig(png_path)
+        plt.clf()
