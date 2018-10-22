@@ -74,7 +74,7 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
   if ((array = json_object_get(root, "nodes")) == NULL)
     return NULL;
 
-  for (sizt_t i = 0; i < json_array_size(array); i++)
+  for (size_t i = 0; i < json_array_size(array); i++)
     {
       json_t *item;
 
