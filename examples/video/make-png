@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 from subprocess import Popen, PIPE
 
-n = 1024
-cmd = ['../dumper/dumper', '--bins', '32', '--directory', 'tmp']
+n = 2048
+cmd = ['../dumper/dumper', '--bins', '64', '--directory', 'tmp']
 proc = Popen(cmd, stdin=PIPE)
 
 mu = 5.0

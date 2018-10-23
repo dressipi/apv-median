@@ -1,11 +1,5 @@
-video:
-	rm -f video.mp4
-	ffmpeg \
-	-r 25 \
-	-i tmp/%08d.png \
-	-c:v libx264 \
-	-vf fps=25 \
-	-pix_fmt yuv420p video.mp4
+video: make-mp4
+	./make-mp4 video.mp4
 
 png: make-png
 	./make-png
