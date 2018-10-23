@@ -1,1 +1,16 @@
 #!/bin/sh
+#
+# This is a GMT (Generic mapping tools) script
+
+BASE='series'
+PS="${BASE}.ps"
+PDF="${BASE}.pdf"
+
+PRJ="-JX7il/4i"
+RNG="-R1/65536/4.5/5.5"
+
+gmt psxy exact.csv $PRJ $RNG -W3p,grey -K > $PS
+gmt psxy approx.csv $PRJ $RNG -W1p,red -O -K >> $PS
+gmt psbasemap $PRJ $RNG -Bx1 -By0.25 -O >> $PS
+
+gmt psconvert -A5p -P -Tf $PS

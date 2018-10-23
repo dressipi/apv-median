@@ -12,7 +12,7 @@ dumper/dumper:
 	$(MAKE) -C dumper dumper
 
 clean:
-	$(RM) $(CSV)
+	$(RM) $(CSV) series.ps gmt.history
 	$(MAKE) -C dumper clean
 
 .PHONY: all clean
