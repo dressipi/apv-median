@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import json
+import numpy as np
+import numpy.random as nr
+from subprocess import Popen, PIPE
+import time
+
+n = 65536
+cmd = ['dumper/dumper', '--bins', '64', '--output', 'approx.csv']
+proc = Popen(cmd, stdin=PIPE)
+
+mu = 5.0
+sigma = 1.0
+
+data = nr.normal(mu, sigma, n)
+
+t0 = time.time()
+for x in data:
+    proc.stdin.write("%e\n" % x)
+proc.stdin.close()
+while proc.returncode is None:
+    proc.poll()
+t1 = time.time()
+
+print(t1 - t0)
+
+t0 = time.time()
+with open('exact.csv', 'w') as f:
+    for k in range(1, n):
+        initial = data[:k]
+        m = np.median(initial)
+        f.write('%i %e\n' % (k-1, m))
+t1 = time.time()
+
+print(t1 - t0)
