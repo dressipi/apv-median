@@ -22,6 +22,9 @@ CU_TestInfo tests_histogram[] =
     {"histogram_json_save", test_histogram_json_save},
     {"histogram_json_load", test_histogram_json_load},
     {"histogram JSON round-trip", test_histogram_json_roundtrip},
+    {"histogram capacity zero", test_histogram_capacity_zero},
+    {"histogram capacity empty", test_histogram_capacity_empty},
+    {"histogram capacity small", test_histogram_capacity_small},
     CU_TEST_INFO_NULL,
   };
 
@@ -157,4 +160,46 @@ extern void test_histogram_json_roundtrip(void)
     }
 
   histogram_destroy(hist1);
+}
+
+extern void test_histogram_capacity_zero(void)
+{
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+  CU_ASSERT_NOT_EQUAL(histogram_capacity(hist, 0), 0);
+
+  histogram_destroy(hist);
+}
+
+extern void test_histogram_capacity_empty(void)
+{
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+  CU_ASSERT_EQUAL(histogram_capacity(hist, 1), 0);
+
+  histogram_destroy(hist);
+}
+
+extern void test_histogram_capacity_small(void)
+{
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  for (size_t i = 0 ; i < 10 ; i++)
+    {
+      int res = histogram_add(hist, i);
+      CU_ASSERT_EQUAL_FATAL(res, 0);
+    }
+
+  double m1, m2;
+
+  CU_ASSERT_EQUAL(median(hist, &m1), 0);
+  CU_ASSERT_EQUAL(histogram_capacity(hist, 5), 0);
+  CU_ASSERT_EQUAL(median(hist, &m2), 0);
+  CU_ASSERT_DOUBLE_EQUAL(m1, m2, 1e-8);
+
+  histogram_destroy(hist);
 }

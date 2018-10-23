@@ -492,3 +492,44 @@ static int histogram_add_main(histogram_t *hist, double t)
 
   return merge(hist);
 }
+
+
+/*
+  This is a method for giving a histogram a "fixed capacity",
+  so that older values are discarded and we have a shorter
+  memory of the data input.  The idea is that we can scale
+  the histogram so that it's overal volume is some fixed
+  value, this scalung makes the more recent inputs "count
+  more" towards the median than the older ones, and repeated
+  scalings in this manner will amount to an exponential
+  decay for older data (as in the Unix "load" calulation.
+
+  The method is recursive, we sum the bin-counts on the way
+  up the recursion and perform the scaling on the way back
+  down.
+
+  Note that we do nothing if the area of the histogram is less
+  than the capacity.
+*/
+
+static double nodes_capacity(node_t*, double, double);
+
+extern int histogram_capacity(histogram_t *hist, double capacity)
+{
+  if (capacity <= 0.0) return 1;
+  double factor = nodes_capacity(hist->nodes, 0.0, capacity);
+
+  return (factor <= 1.0) ? 0 : 1;
+}
+
+static double nodes_capacity(node_t *node, double sum, double capacity)
+{
+  if (node == NULL)
+    return (sum > capacity) ? (capacity / sum) : 1.0;
+
+  sum += node->bin.count;
+  double factor = nodes_capacity(node->next, sum, capacity);
+  node->bin.count *= factor;
+
+  return factor;
+}

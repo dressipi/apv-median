@@ -18,5 +18,8 @@ extern void test_histogram_post_init(void);
 extern void test_histogram_json_save(void);
 extern void test_histogram_json_load(void);
 extern void test_histogram_json_roundtrip(void);
+extern void test_histogram_capacity_zero(void);
+extern void test_histogram_capacity_empty(void);
+extern void test_histogram_capacity_small(void);
 
 #endif
