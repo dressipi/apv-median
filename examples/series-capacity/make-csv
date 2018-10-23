@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+
+import numpy as np
+import numpy.random as nr
+from subprocess import Popen, PIPE
+import time
+
+n = 65536
+cmd = [
+    'dumper/dumper',
+    '--capacity', '4096',
+    '--bins', '64',
+    '--output', 'approx.csv'
+]
+proc = Popen(cmd, stdin=PIPE)
+
+mu = 5.0
+sigma = 1.0
+
+data = np.hstack(
+    [
+        nr.normal(mu, sigma, n/2),
+        nr.normal(mu+2, sigma, n/2)
+    ]
+)
+
+for x in data:
+    proc.stdin.write("%e\n" % x)
+
+proc.stdin.close()
+
+while proc.returncode is None:
+    proc.poll()

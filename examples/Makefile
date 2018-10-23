@@ -1,4 +1,4 @@
-DIRS = video series
+DIRS = video series-compare series-capacity
 
 all:
 	for dir in $(DIRS) ; do $(MAKE) -C $$dir all ; done

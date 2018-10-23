@@ -1,0 +1,7 @@
+# gengetopt input for dump
+package "dumper"
+purpose "Dump median for each double read from stdin"
+option  "bins" 		b "number of histogram bins"	int optional default="20"
+option  "capacity"	c "maximal capacity"   		float optional
+option	"output"	o "output CSV"	       		string optional
+option	"verbose"	v "verbose operation" 		flag off
