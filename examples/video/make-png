@@ -7,7 +7,7 @@ from numpy.random import normal
 from subprocess import Popen, PIPE
 
 n = 2048
-cmd = ['../dumper/dumper', '--bins', '64', '--directory', 'tmp']
+cmd = ['dumper/dumper', '--bins', '64', '--directory', 'tmp']
 proc = Popen(cmd, stdin=PIPE)
 
 mu = 5.0

@@ -1,6 +1,6 @@
 default: dumper
 
-ROOT = ../..
+ROOT = ../../..
 
 include $(ROOT)/Common.mk
 
@@ -9,6 +9,8 @@ RUBBISH += $(OBJ) dumper *~
 CFLAGS += -I$(ROOT)/src
 LDFLAGS += -L$(ROOT)/src
 LDLIBS := -lapvmedian -lm $(LDLIBS)
+
+all: dumper
 
 dumper: $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o dumper
