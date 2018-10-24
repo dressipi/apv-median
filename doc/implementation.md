@@ -94,7 +94,7 @@ effect on speed, like a cyclist shaving his/her legs.
 Evaluation
 ----------
 
-<img align="right" height="200" src="img/compare.jpeg">
+<img align="right" height="200" src="img/compare.png">
 
 In addition to the [unit tests](../tests/), we have have some
 [scripts](../examples/series-compare/) which compare the
