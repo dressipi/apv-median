@@ -81,6 +81,7 @@ traversal (particularly on modern hardware), but the number of
 bins is small, 20--50, so this is barely an issue.
 
 <img align="right" height="200" src="img/shaved-legs.jpeg">
+
 One *could* use a tree-like structure instead, but I would
 expect that this would add complexity (we need to access the
 lower-bin in order to determine the range of the bin, and
