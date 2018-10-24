@@ -96,8 +96,20 @@ Evaluation
 
 <img align="right" height="200" src="img/compare.png">
 
-In addition to the [unit tests](../tests/), we have have some
-[scripts](../examples/series-compare/) which compare the
-approximation to the exact value for random (Gaussian) input
-data; the results are similar to the plots show in the paper,
-the approximation improves with the number of points processed.
+In addition to the [unit tests](../test/), we have have some
+[scripts](../examples/series-compare/) to create plots (right)
+which compare the approximation (red) to the exact value for
+random (Gaussian) input data (grey); the results are similar to
+the plots show in the paper, the approximation improves with
+the number of points processed and aligns to the exact result.
+This gives us "sniff test" confidence in the implementation.
+
+In terms of speed, in generating the data for these plots we
+record that adding 64,000 samples to a 64-bin histogram, along
+with 64,000 medians evaluated takes 0.34s.  By contrast, the
+exact values (obtained by Numpy) take 30s.  Since the time
+taken in the exact calcuation is, of necessity, at least
+linear in the number of points, while the approximation takes
+constant time, we can make this "two orders of magnitude"
+improvement as large as we like, just by taking more data
+points.
