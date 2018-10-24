@@ -37,6 +37,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help              Print help and exit",
   "  -V, --version           Print version and exit",
   "  -b, --bins=INT          number of histogram bins  (default=`20')",
+  "  -c, --capacity=FLOAT    histogram capacity",
   "  -d, --directory=STRING  location for JSON files  (default=`.')",
   "  -v, --verbose           verbose operation  (default=off)",
     0
@@ -46,6 +47,7 @@ typedef enum {ARG_NO
   , ARG_FLAG
   , ARG_STRING
   , ARG_INT
+  , ARG_FLOAT
 } options_arg_type;
 
 static
@@ -67,6 +69,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->bins_given = 0 ;
+  args_info->capacity_given = 0 ;
   args_info->directory_given = 0 ;
   args_info->verbose_given = 0 ;
 }
@@ -77,6 +80,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->bins_arg = 20;
   args_info->bins_orig = NULL;
+  args_info->capacity_orig = NULL;
   args_info->directory_arg = gengetopt_strdup (".");
   args_info->directory_orig = NULL;
   args_info->verbose_flag = 0;
@@ -91,8 +95,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->bins_help = gengetopt_args_info_help[2] ;
-  args_info->directory_help = gengetopt_args_info_help[3] ;
-  args_info->verbose_help = gengetopt_args_info_help[4] ;
+  args_info->capacity_help = gengetopt_args_info_help[3] ;
+  args_info->directory_help = gengetopt_args_info_help[4] ;
+  args_info->verbose_help = gengetopt_args_info_help[5] ;
   
 }
 
@@ -180,6 +185,7 @@ options_release (struct gengetopt_args_info *args_info)
 {
   unsigned int i;
   free_string_field (&(args_info->bins_orig));
+  free_string_field (&(args_info->capacity_orig));
   free_string_field (&(args_info->directory_arg));
   free_string_field (&(args_info->directory_orig));
   
@@ -223,6 +229,8 @@ options_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->bins_given)
     write_into_file(outfile, "bins", args_info->bins_orig, 0);
+  if (args_info->capacity_given)
+    write_into_file(outfile, "capacity", args_info->capacity_orig, 0);
   if (args_info->directory_given)
     write_into_file(outfile, "directory", args_info->directory_orig, 0);
   if (args_info->verbose_given)
@@ -399,6 +407,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
+  case ARG_FLOAT:
+    if (val) *((float *)field) = (float)strtod (val, &stop_char);
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -414,6 +425,7 @@ int update_arg(void *field, char **orig_field,
   /* check numeric conversion */
   switch(arg_type) {
   case ARG_INT:
+  case ARG_FLOAT:
     if (val && !(stop_char && *stop_char == '\0')) {
       fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
       return 1; /* failure */
@@ -484,12 +496,13 @@ options_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "bins",	1, NULL, 'b' },
+        { "capacity",	1, NULL, 'c' },
         { "directory",	1, NULL, 'd' },
         { "verbose",	0, NULL, 'v' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVb:d:v", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVb:c:d:v", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -513,6 +526,18 @@ options_internal (
               &(local_args_info.bins_given), optarg, 0, "20", ARG_INT,
               check_ambiguity, override, 0, 0,
               "bins", 'b',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* histogram capacity.  */
+        
+        
+          if (update_arg( (void *)&(args_info->capacity_arg), 
+               &(args_info->capacity_orig), &(args_info->capacity_given),
+              &(local_args_info.capacity_given), optarg, 0, 0, ARG_FLOAT,
+              check_ambiguity, override, 0, 0,
+              "capacity", 'c',
               additional_error))
             goto failure;
         

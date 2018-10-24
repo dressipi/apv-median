@@ -42,6 +42,9 @@ struct gengetopt_args_info
   int bins_arg;	/**< @brief number of histogram bins (default='20').  */
   char * bins_orig;	/**< @brief number of histogram bins original value given at command line.  */
   const char *bins_help; /**< @brief number of histogram bins help description.  */
+  float capacity_arg;	/**< @brief histogram capacity.  */
+  char * capacity_orig;	/**< @brief histogram capacity original value given at command line.  */
+  const char *capacity_help; /**< @brief histogram capacity help description.  */
   char * directory_arg;	/**< @brief location for JSON files (default='.').  */
   char * directory_orig;	/**< @brief location for JSON files original value given at command line.  */
   const char *directory_help; /**< @brief location for JSON files help description.  */
@@ -51,6 +54,7 @@ struct gengetopt_args_info
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int bins_given ;	/**< @brief Whether bins was given.  */
+  unsigned int capacity_given ;	/**< @brief Whether capacity was given.  */
   unsigned int directory_given ;	/**< @brief Whether directory was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
 

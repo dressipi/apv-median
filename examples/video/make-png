@@ -7,12 +7,20 @@ from numpy.random import normal
 from subprocess import Popen, PIPE
 
 n = 2048
-cmd = ['dumper/dumper', '--bins', '64', '--directory', 'tmp']
+cmd = [
+    'dumper/dumper',
+    '--bins', '32',
+    '--directory', 'tmp',
+    '--capacity', '300'
+]
 proc = Popen(cmd, stdin=PIPE)
 
 mu = 5.0
 sigma = 1.0
-for x in normal(mu, sigma, n):
+
+for x in normal(mu, sigma, n/2):
+    proc.stdin.write("%e\n" % x)
+for x in normal(mu + 2, sigma, n/2):
     proc.stdin.write("%e\n" % x)
 
 proc.stdin.close()
@@ -31,6 +39,8 @@ for i in range(n):
         widths = edges[1:] - edges[:-1]
         counts = np.array([node['count'] for node in data['nodes']])
         heights = counts / widths
+        plt.ylim(0, 150)
+        plt.xlim(0, 11)
         plt.bar(edges[:-1], heights, widths, align='edge')
         plt.savefig(png_path)
         plt.clf()

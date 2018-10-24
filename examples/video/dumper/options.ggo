@@ -1,6 +1,7 @@
 # gengetopt input for dump
 package "dump"
 purpose "Dump histogram files for each double read from stdin"
-option  "bins" 		b "number of histogram bins"	int optional default="20"
-option	"directory"	d "location for JSON files"	string optional default="."
-option	"verbose"	v "verbose operation" 		flag off
+option "bins" 		b "number of histogram bins"	int optional default="20"
+option "capacity"	c "histogram capacity" 		float optional
+option "directory"	d "location for JSON files"	string optional default="."
+option "verbose"	v "verbose operation" 		flag off

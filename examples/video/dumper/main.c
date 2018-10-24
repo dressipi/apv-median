@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <float.h>
 
 #include <histogram.h>
 
@@ -26,6 +27,7 @@ int main(int argc, char** argv)
       return EXIT_FAILURE;
     }
 
+  double capacity = info.capacity_given ? info.capacity_arg : DBL_MAX;
   size_t count = 0;
   double value;
   char path[PATH_LEN];
@@ -37,6 +39,12 @@ int main(int argc, char** argv)
 	  fprintf(stderr, "error adding %f to histogram\n", value);
 	  return EXIT_FAILURE;
 	}
+
+      if (histogram_capacity(hist, capacity) != 0)
+        {
+          fprintf(stderr, "failed capacity for %f\n", capacity);
+          return 1;
+        }
 
       snprintf(path, PATH_LEN, "%s/%08zi.json", info.directory_arg, count);
 
