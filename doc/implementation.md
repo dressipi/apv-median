@@ -40,6 +40,8 @@ This means that counts *in a bin* will generally be non-integer
 (even though the total over all bins will be an integer, at least
 up to floating point error accumulation).
 
+<img align="right" height="200" src="img/histogram.png">
+
 But now we have one bin too many, so we seek to merge two
 adjacent bins.  This choice is made in such a way as to maximise
 the *entropy* of the resulting histogram.  In practice this
@@ -48,7 +50,7 @@ count is (or can be thought of) as the *area* of the bin, roughly
 equal areas.  So we end up with thin tall bins where the data
 is dense, short fat bins where it is sparse.
 
-Calulating the approximate median from this data-structure is
+Calculating the approximate median from this data-structure is
 straightforward, since it is just the 50% quartile of the
 cumulative density function of the histogram.  We walk through
 the nodes of the histogram, summing the counts until we find
@@ -61,7 +63,7 @@ Data structures
 
 The set of bins is implemented as a (singly-) linked list of
 `node_t`,
-```
+```c
 struct bin_t
 {
   double max, count;
@@ -108,7 +110,7 @@ In terms of speed, in generating the data for these plots we
 record that adding 64,000 samples to a 64-bin histogram, along
 with 64,000 medians evaluated takes 0.34s.  By contrast, the
 exact values (obtained by Numpy) take 30s.  Since the time
-taken in the exact calcuation is, of necessity, at least
+taken in the exact calculation is, of necessity, at least
 linear in the number of points, while the approximation takes
 constant time, we can make this "two orders of magnitude"
 improvement as large as we like, just by taking more data
