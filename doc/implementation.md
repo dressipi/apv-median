@@ -36,15 +36,15 @@ lower bin (into which the data point is assumed to have fallen)
 and the lower bound of the upper bin.  These two bins need to have
 the count of their parent distributed amongst them, and this is
 done by a linear interpolation from the value of the data-point.
-This means that counts _in a bin_ will generally be non-integer
+This means that counts *in a bin* will generally be non-integer
 (even though the total over all bins will be an integer, at least
 up to floating point error accumulation).
 
 But now we have one bin too many, so we seek to merge two
 adjacent bins.  This choice is made in such a way as to maximise
-the _entropy_ of the resulting histogram.  In practice this
+the *entropy* of the resulting histogram.  In practice this
 means to have roughly equal counts for each bin, and since the
-count is (or can be thought of) as the _area_ of the bin, roughly
+count is (or can be thought of) as the *area* of the bin, roughly
 equal areas.  So we end up with thin tall bins where the data
 is dense, short fat bins where it is sparse.
 
@@ -81,7 +81,7 @@ traversal (particularly on modern hardware), but the number of
 bins is small, 20--50, so this is barely an issue.
 
 <img align="right" height="200" src="img/shaved-legs.jpeg">
-One _could_ use a tree-like structure instead, but I would
+One *could* use a tree-like structure instead, but I would
 expect that this would add complexity (we need to access the
 lower-bin in order to determine the range of the bin, and
 we'd also need to iterate over all bins in order to calculate
