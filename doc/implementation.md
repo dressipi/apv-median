@@ -27,16 +27,18 @@ One does not need to store the lower-limit of the bin since
 that is the upper-limit of the previous bin.
 
 Imagine that we have such a histogram, and that a new data-point
-is to be inserted.  We search for a bin into which it falls; if
-there is one, then we split that bin into two with the value
-of the data-point as the upper limit of the lower bin (into
-which the data point is assumed to have fallen) and the lower
-bound of the upper bin.  These two bins need to have the count
-of their parent distributed amongst them, and this is done by
-a linear interpolation from the value of the data-point. This
-means that counts _in a bin_ will generally be non-integer (even
-though the total over all bins will be an integer, at least up
-to floating point error accumulation).
+is to be inserted.  We search for a bin into which it falls: if
+there isn't one (i.e., if the data-point is larger than any one
+seen so far) then we create a new bin whose maximum is the value
+and whose count is 1; If there is one, then we split that bin into
+two with the value of the data-point as the upper limit of the
+lower bin (into which the data point is assumed to have fallen)
+and the lower bound of the upper bin.  These two bins need to have
+the count of their parent distributed amongst them, and this is
+done by a linear interpolation from the value of the data-point.
+This means that counts _in a bin_ will generally be non-integer
+(even though the total over all bins will be an integer, at least
+up to floating point error accumulation).
 
 But now we have one bin too many, so we seek to merge two
 adjacent bins.  This choice is made in such a way as to maximise
