@@ -80,6 +80,7 @@ an operation which is typically slow compared to array
 traversal (particularly on modern hardware), but the number of
 bins is small, 20--50, so this is barely an issue.
 
+<img align="right" height="200" src="img/shaved-legs.jpeg">
 One _could_ use a tree-like structure instead, but I would
 expect that this would add complexity (we need to access the
 lower-bin in order to determine the range of the bin, and
@@ -87,5 +88,3 @@ we'd also need to iterate over all bins in order to calculate
 the median as discussed above, so a vanilla tree library would
 probably need to be customised) while only having a marginal
 effect on speed, like a cyclist shaving his/her legs.
-
-[Faster?](img/shaved-legs.jpeg)
