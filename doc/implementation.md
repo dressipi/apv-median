@@ -54,3 +54,36 @@ cumulative density function of the histogram.  We walk through
 the nodes of the histogram, summing the counts until we find
 the bin which straddles this 50%, then perform an (inverse)
 linear interpolation to find the required value.
+
+
+Data structures
+---------------
+
+The set of bins is implemented as a (singly-) linked list of
+`node_t`,
+```
+struct bin_t
+{
+  double max, count;
+};
+
+struct node_t
+{
+  bin_t bin;
+  node_t *next;
+};
+```
+This is a friendly structure for the splitting and merging
+of bins described above.  Traversing the list (as needed to
+find the median-bin) is of course a linked-list traversal,
+an operation which is typically slow compared to array
+traversal (particularly on modern hardware), but the number of
+bins is small, 20--50, so this is barely an issue.
+
+One _could_ use a tree-like structure instead, but I would
+expect that this would add complexity (we need to access the
+lower-bin in order to determine the range of the bin, and
+we'd also need to iterate over all bins in order to calculate
+the median as discussed above, so a vanilla tree library would
+probably need to be customised) while only having a marginal
+effect on speed, like a cyclist shaving his/her legs.
