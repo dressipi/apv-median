@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <errno.h>
 
 #include <jansson.h>
 
@@ -30,7 +31,10 @@ struct histogram_t
 extern histogram_t* histogram_new(size_t n)
 {
   if (n == 0)
-    return NULL;
+    {
+      errno = EINVAL;
+      return NULL;
+    }
 
   histogram_t *hist;
 
@@ -65,19 +69,27 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
 {
   json_t *root;
 
-
   if ((root = json_loadf(st, 0, NULL)) == NULL)
-    return NULL;
+    {
+      errno = ENODATA;
+      return NULL;
+    }
 
   json_t *maxnodes;
 
   if ((maxnodes = json_object_get(root, "maxnodes")) == NULL)
-    return NULL;
+    {
+      errno = ENODATA;
+      return NULL;
+    }
 
   size_t n;
 
   if ((n = json_integer_value(maxnodes)) == 0)
-    return NULL;
+    {
+      errno = EINVAL;
+      return NULL;
+    }
 
   histogram_t *hist;
 
@@ -87,12 +99,18 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
   json_t *array;
 
   if ((array = json_object_get(root, "nodes")) == NULL)
-    return NULL;
+    {
+      errno = ENODATA;
+      return NULL;
+    }
 
   size_t k;
 
   if ((k = json_array_size(array)) > n)
-    return NULL;
+    {
+      errno = EINVAL;
+      return NULL;
+    }
 
   node_t *node = NULL, *next = NULL;
 
@@ -101,12 +119,18 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
       json_t *item;
 
       if ((item = json_array_get(array, k - 1 - i)) == NULL)
-	return NULL;
+	{
+	  errno = ENODATA;
+	  return NULL;
+	}
 
       double max, count;
 
       if (json_unpack(item, "{s:f, s:f}", "max", &max, "count", &count) != 0)
-	return NULL;
+	{
+	  errno = ENODATA;
+	  return NULL;
+	}
 
       if ((node = malloc(sizeof(node_t))) == NULL)
 	return NULL;
@@ -134,7 +158,9 @@ extern histogram_t* histogram_json_load(const char *path)
 
   if (fclose(st) == EOF)
     {
-      if (hist != NULL) histogram_destroy(hist);
+      if (hist != NULL)
+	histogram_destroy(hist);
+
       return NULL;
     }
 
@@ -242,8 +268,8 @@ extern int histogram_json_save(const histogram_t* hist, const char *path)
 
 
 /*
-  it is convenient for the median calculation to dump
-  the histogram's bins to an array
+  it is convenient for the median calculation to dump the
+  histogram's bins to the (onboard) bins array
 */
 
 extern size_t histogram_num_bins(const histogram_t *hist)
@@ -517,7 +543,11 @@ static double nodes_capacity(node_t*, double, double);
 
 extern int histogram_capacity(histogram_t *hist, double capacity)
 {
-  if (capacity <= 0.0) return 1;
+  if (capacity <= 0.0)
+    {
+      errno = EINVAL;
+      return 1;
+    }
 
   double
     factor = nodes_capacity(hist->nodes, 0.0, capacity);

@@ -1,6 +1,6 @@
 /*
   node.c
-  Copyright (c) J.J. Green 2018
+  Copyright (c) Dressipi 2018
 */
 
 #include <stdlib.h>

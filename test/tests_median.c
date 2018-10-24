@@ -4,6 +4,8 @@
 */
 
 #include <median.h>
+
+#include "assert_errno.h"
 #include "tests_median.h"
 
 #include <stdlib.h>
@@ -41,18 +43,25 @@ static double median_exact(size_t n, const double *v)
 
 static void test_median_array(size_t n, const double *v, double x, double eps)
 {
+  CU_CLEAR_ERRNO();
+
   histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_ERRNO(0);
   CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
 
   for (size_t i = 0 ; i < n ; i++)
     {
       int res = histogram_add(hist, v[i]);
+      CU_ASSERT_ERRNO(0);
       CU_ASSERT_EQUAL(res, 0);
     }
 
   double m = 0.0;
 
   CU_ASSERT_EQUAL(median(hist, &m), 0);
+
+  CU_ASSERT_ERRNO(0);
   CU_ASSERT_NOT_EQUAL(m, 0);
   CU_ASSERT_DOUBLE_EQUAL(m, x, eps);
 }

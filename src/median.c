@@ -17,7 +17,9 @@ extern int median(const histogram_t *hist, double *value)
   for (size_t i = 0 ; i < k ; i++)
     total += bins[i].count;
 
-  double partial = 0.0, min = 0.0;
+  double
+    partial = 0.0,
+    min = 0.0;
 
   for (size_t i = 0 ; i < k ; i++)
     {
@@ -35,6 +37,13 @@ extern int median(const histogram_t *hist, double *value)
       partial += count;
       min = max;
     }
+
+  /*
+    We should never reach here, since the median of any
+    non-empty set of numbers should be between the min
+    and max values (possibly equal to, in the degenerate
+    case of equal values).
+   */
 
   return 1;
 }
