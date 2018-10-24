@@ -40,7 +40,7 @@ This means that counts *in a bin* will generally be non-integer
 (even though the total over all bins will be an integer, at least
 up to floating point error accumulation).
 
-<img align="right" height="200" src="img/histogram.png">
+<img align="right" height="300" src="img/histogram.png">
 
 But now we have one bin too many, so we seek to merge two
 adjacent bins.  This choice is made in such a way as to maximise
