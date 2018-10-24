@@ -211,7 +211,9 @@ extern void test_histogram_json_roundtrip(void)
 
       CU_ASSERT_ERRNO(0);
       CU_ASSERT_PTR_NOT_NULL_FATAL(hist2);
+
       CU_ASSERT_EQUAL(median(hist2, &m2), 0);
+      CU_ASSERT_ERRNO(0);
 
       CU_ASSERT_DOUBLE_EQUAL(m1, m2, 1e-6);
 

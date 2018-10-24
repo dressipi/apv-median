@@ -1,3 +1,11 @@
+/*
+  assert_errno.c
+
+  Some helpwe methods for erron assertions in tests
+
+  Copyright (c) Dressipi 2018
+*/
+
 #include "assert_errno.h"
 
 extern void clear_errno(void)
