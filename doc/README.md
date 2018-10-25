@@ -8,5 +8,6 @@ IEEE Trans. Circ. Sys. Video Tech., **25** (9), Sep. 2015
 ([DOI](https://doi.org/10.1109/TCSVT.2014.2376137)).
 
 There are some additional notes on
-- [implementation](implementation.md)
-- [capacity](capacity.md)
+
+- [Implementation](implementation.md) details
+- [Capacity](capacity.md), how we forget older data
