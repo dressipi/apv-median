@@ -3,10 +3,10 @@ Capacity
 
 The base algorithm, as described in the paper, has no facility
 for handling a median of a "window" of data; the histogram data
-structure is a _préciss_ of all of the values that have ever been
+structure is a _précis_ of all of the values that have ever been
 thrown at it, but has "forgotton" when they were added and how
-big they were, remembering only the affect they had on the existing
-bins (and that affect persists the bins' dynamic changes).
+big they were, remembering only the effect they had on the existing
+bins (and that effect persists despite the bins' dynamic changes).
 
 There _are_ papers dealing with such finite-window median
 approximations, but they do seem to be rather complicated; much
@@ -20,7 +20,7 @@ previously been processed_.
 
 The idea is very simple.  We have a value which is the "capacity"
 of the histogram, this being the maximum value that the histogram
-total count can be.  If the count is less than teh capacity then
+total count can be.  If the count is less than the capacity then
 we do nothing; if, on adding a new data point, the total count is
 above the capacity then we scale the counts of the histogram so
 that the total count is _exactly_ the capacity.  Since we add
@@ -32,7 +32,7 @@ i.e., each count is repeatedly multiplied by a number slightly
 smaller than 1.0.  This (in the absence of bin dynamics) will
 result in an _exponential decay_ to older count values.
 
-<img align="right" height="200" src="img/capacity.png">
+<img align="right" height="250" src="img/capacity.png">
 
 In the [examples directory](../examples/series-capacity/) we have
 some code which sends data with a Gaussian distribution, mean 5.0,
@@ -59,10 +59,10 @@ and so on.
 
 In terms of implementation in the library, we add a function
 ```
-int histogram_capacity(histogram_t *hist, double cap);
+int histogram_capacity(histogram_t *hist, double c);
 ```
-to `histogram.c` which performs this scaling to `cap`, and this
-is not called automatically when new data points are added.
+to `histogram.c` which performs this scaling to capacity `c`, and
+this is not called automatically when new data points are added.
 The reason is that we will generally have data points in groups
 (the scores for many garments for a single user), so it is
 convenient to add all of those at once, the perform the scaling
