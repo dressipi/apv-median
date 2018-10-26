@@ -3,6 +3,8 @@ exec_prefix = @exec_prefix@
 bindir      = @bindir@
 mandir      = @mandir@
 datarootdir = @datarootdir@
+includedir  = @includedir@
+libdir      = @libdir@
 
 EXEC = $(bindir)
 MAN1 = $(mandir)/man1
