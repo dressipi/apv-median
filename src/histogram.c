@@ -26,8 +26,6 @@ struct histogram_t
 };
 
 
-/* constructor / destructor */
-
 extern histogram_t* histogram_new(size_t n)
 {
   if (n == 0)
@@ -114,7 +112,7 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
 
   node_t *node = NULL, *next = NULL;
 
-  for (size_t i = 0; i < k ; i++)
+  for (size_t i = 0 ; i < k ; i++)
     {
       json_t *item;
 
@@ -189,19 +187,28 @@ static int nodes_print_json(json_t *objs, node_t *nodes)
     nodes_print_json(objs, nodes->next);
 }
 
+#define DATE_LEN 32
+
 static const char* date_string(void)
 {
   time_t t = time(NULL);
-  struct tm* bdt = gmtime(&t);
-  static char buffer[32];
+  struct tm *bdt = gmtime(&t);
+  static char buffer[DATE_LEN];
 
-  snprintf(buffer, 32,
-           "%04d-%02d-%02dT%02d:%02d",
-           bdt->tm_year + 1900,
-           bdt->tm_mon + 1,
-           bdt->tm_mday,
-           bdt->tm_hour,
-           bdt->tm_min);
+  int count =
+    snprintf(buffer, DATE_LEN,
+	     "%04d-%02d-%02dT%02d:%02d",
+	     bdt->tm_year + 1900,
+	     bdt->tm_mon + 1,
+	     bdt->tm_mday,
+	     bdt->tm_hour,
+	     bdt->tm_min);
+
+  if (count >= DATE_LEN)
+    {
+      errno = ENOBUFS;
+      return NULL;
+    }
 
   return buffer;
 }
@@ -350,7 +357,7 @@ static double entropy(double c)
 }
 
 
-/* add a bew value t to the histogram */
+/* add a new value t to the histogram */
 
 static int histogram_add_first(histogram_t*, double);
 static int histogram_add_init(histogram_t*, double);
@@ -361,12 +368,12 @@ extern int histogram_add(histogram_t *hist, double t)
   size_t k = hist->k, n = hist->n;
   int (*f)(histogram_t*, double);
 
-  if (k == 0)
-    f = histogram_add_first;
-  else if (k < n)
+  if (k >= n)
+    f = histogram_add_main;
+  else if (k > 0)
     f = histogram_add_init;
   else
-    f = histogram_add_main;
+    f = histogram_add_first;
 
   return f(hist, t);
 }
@@ -386,6 +393,8 @@ static int histogram_add_first(histogram_t *hist, double t)
 
 
 /*
+  From the paper:
+
   The initialization of the histogram in the proposed method can be
   achieved in the same manner as in the interpolated bins algorithm
   introduced previously. To repeat, until the buffer is filled, i.e.
@@ -469,7 +478,7 @@ static int histogram_add_main(histogram_t *hist, double t)
 	return 1;
 
       node->bin.count = c * alpha + 1.0;
-      node->next->bin.count = c * (1 - alpha);
+      node->next->bin.count = c * (1.0 - alpha);
 
       hist->nodes = node;
     }
@@ -524,12 +533,11 @@ static int histogram_add_main(histogram_t *hist, double t)
   This is a method for giving a histogram a "fixed capacity",
   so that older values are discarded and we have a shorter
   memory of the data input.  The idea is that we can scale
-  the histogram so that its overal area (the sum of the bin-
+  the histogram so that its overall area (the sum of the bin-
   counts) does not exceed some fixed value, this scalung makes
   the more recent inputs "count more" towards the median than
   the older ones, and repeated scalings in this manner will
-  amount to an exponential decay for older data (as in the Unix
-  "load" calulation).
+  amount to an exponential decay for older data.
 
   The method is recursive, we sum the bin-counts on the way
   up the recursion and perform the scaling on the way back
@@ -549,8 +557,7 @@ extern int histogram_capacity(histogram_t *hist, double capacity)
       return 1;
     }
 
-  double
-    factor = nodes_capacity(hist->nodes, 0.0, capacity);
+  double factor = nodes_capacity(hist->nodes, 0.0, capacity);
 
   return (factor <= 1.0) ? 0 : 1;
 }
