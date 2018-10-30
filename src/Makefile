@@ -9,6 +9,8 @@ include ../Common.mk
 CFLAGS +=
 LDLIBS += -lm
 
+headerdir = $(includedir)/apv-median
+
 all: $(LIB)
 
 $(LIB): $(OBJ)
@@ -21,8 +23,8 @@ install-lib: $(LIB)
 	$(INSTALL) -m 644 $(LIB) $(libdir)
 
 install-headers: $(HDR)
-	$(INSTALL) -d $(includedir)
-	$(INSTALL) -m 644 $(HDR) $(includedir)
+	$(INSTALL) -d $(headerdir)
+	$(INSTALL) -m 644 $(HDR) $(headerdir)
 
 uninstall: uninstall-lib uninstall-headers
 
@@ -30,7 +32,7 @@ uninstall-lib:
 	$(RM) $(libdir)/$(LIB)
 
 uninstall-headers:
-	for hdr in $(HDR) ; do $(RM) $(includedir)/$$hdr ; done
+	for hdr in $(HDR) ; do $(RM) $(headerdir)/$$hdr ; done
 
 clean:
 	$(RM) $(LIB) $(OBJ)
