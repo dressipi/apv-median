@@ -12,6 +12,9 @@ all:
 install:
 	make -C src install
 
+uninstall:
+	make -C src uninstall
+
 
 ifeq ($(strip $(WITH_UNIT)),1)
 
