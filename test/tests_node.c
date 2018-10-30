@@ -3,7 +3,7 @@
   Copyright (c) Dressipi 2018
 */
 
-#include <node.h>
+#include <apv-median/node.h>
 
 #include "assert_errno.h"
 #include "tests_node.h"

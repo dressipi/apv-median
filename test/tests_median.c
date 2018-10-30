@@ -3,7 +3,7 @@
   Copyright (c) Dressipi 2018
 */
 
-#include <median.h>
+#include <apv-median/median.h>
 
 #include "assert_errno.h"
 #include "tests_median.h"

@@ -3,8 +3,8 @@
   Copyright (c) Dressipi 2018
 */
 
-#include <histogram.h>
-#include <median.h>
+#include <apv-median/histogram.h>
+#include <apv-median/median.h>
 
 #include "assert_errno.h"
 #include "tests_histogram.h"
