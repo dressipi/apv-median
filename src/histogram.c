@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <errno.h>
+#include <float.h>
 
 #include <jansson.h>
 
@@ -347,15 +348,29 @@ static int merge(histogram_t *hist)
 
 
 /*
-  this isn't the entropy, but in the context used is proportional
-  to it, which is enough for our purposes
+  This isn't the entropy, but in the context used is proportional
+  to it, which is enough for our purposes.  The case between 0 and
+  DBL_MIN (and yes, there are some doubles in there, the denormalised
+  doubles) is due to x log(x) -> -x as x -> 0 (in particular the limit
+  at zero is zero), while in C, 0*log(0) = 0*(-INFINITY) = NAN
 */
 
 static double entropy(double c)
 {
-  return -c * log(c);
+  if (c > DBL_MIN)
+    {
+      return -c * log(c);
+    }
+  else if (c >= 0)
+    {
+      return c;
+    }
+  else
+    {
+      errno = EDOM;
+      return NAN;
+    }
 }
-
 
 /* add a new value t to the histogram */
 

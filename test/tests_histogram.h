@@ -15,6 +15,7 @@ extern void test_histogram_new_zero(void);
 extern void test_histogram_add_distinct(void);
 extern void test_histogram_add_equal(void);
 extern void test_histogram_post_init(void);
+extern void test_histogram_add_duplicates(void);
 extern void test_histogram_json_save(void);
 extern void test_histogram_json_load(void);
 extern void test_histogram_json_roundtrip(void);
