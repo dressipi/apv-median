@@ -143,6 +143,8 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
   hist->nodes = node;
   hist->k = k;
 
+  json_decref(root);
+
   return hist;
 }
 
