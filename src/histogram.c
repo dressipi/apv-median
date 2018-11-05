@@ -172,7 +172,6 @@ static int node_print_json(json_t *objs, node_t *node)
 
   json_object_set_new(obj, "max", json_real(node->bin.max));
   json_object_set_new(obj, "count", json_real(node->bin.count));
-
   json_array_append_new(objs, obj);
 
   return 0;
@@ -246,6 +245,8 @@ extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
 		}
 	      else
 		err++;
+
+	      json_decref(root);
 	    }
 	  else
 	    err++;
