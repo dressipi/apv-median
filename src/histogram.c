@@ -40,15 +40,15 @@ extern histogram_t* histogram_new(size_t n)
   if ((hist = malloc(sizeof(histogram_t))) != NULL)
     {
       if ((hist->bins = malloc(n * sizeof(bin_t))) != NULL)
-	{
-	  hist->n = n;
-	  hist->k = 0;
-	  hist->nodes = NULL;
+        {
+          hist->n = n;
+          hist->k = 0;
+          hist->nodes = NULL;
 
-	  return hist;
-	}
+          return hist;
+        }
       else
-	free(hist);
+        free(hist);
     }
 
   return NULL;
@@ -118,21 +118,21 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
       json_t *item;
 
       if ((item = json_array_get(array, k - 1 - i)) == NULL)
-	{
-	  errno = ENODATA;
-	  return NULL;
-	}
+        {
+          errno = ENODATA;
+          return NULL;
+        }
 
       double max, count;
 
       if (json_unpack(item, "{s:f, s:f}", "max", &max, "count", &count) != 0)
-	{
-	  errno = ENODATA;
-	  return NULL;
-	}
+        {
+          errno = ENODATA;
+          return NULL;
+        }
 
       if ((node = malloc(sizeof(node_t))) == NULL)
-	return NULL;
+        return NULL;
 
       node->bin.max = max;
       node->bin.count = count;
@@ -158,7 +158,7 @@ extern histogram_t* histogram_json_load(const char *path)
   if (fclose(st) == EOF)
     {
       if (hist != NULL)
-	histogram_destroy(hist);
+        histogram_destroy(hist);
 
       return NULL;
     }
@@ -197,12 +197,12 @@ static const char* date_string(void)
 
   int count =
     snprintf(buffer, DATE_LEN,
-	     "%04d-%02d-%02dT%02d:%02d",
-	     bdt->tm_year + 1900,
-	     bdt->tm_mon + 1,
-	     bdt->tm_mday,
-	     bdt->tm_hour,
-	     bdt->tm_min);
+             "%04d-%02d-%02dT%02d:%02d",
+             bdt->tm_year + 1900,
+             bdt->tm_mon + 1,
+             bdt->tm_mday,
+             bdt->tm_hour,
+             bdt->tm_min);
 
   if (count >= DATE_LEN)
     {
@@ -226,25 +226,25 @@ extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
 
           if ((root = json_object()) != NULL)
             {
-	      json_t
-		*version = json_string(VERSION),
-		*created = json_string(date_string()),
-		*creator = json_string(PACKAGE_NAME),
-		*maxnodes = json_integer(hist->n);
+              json_t
+                *version = json_string(VERSION),
+                *created = json_string(date_string()),
+                *creator = json_string(PACKAGE_NAME),
+                *maxnodes = json_integer(hist->n);
 
-	      if (
-		  (json_object_set_new(root, "creator", creator) == 0) &&
+              if (
+                  (json_object_set_new(root, "creator", creator) == 0) &&
                   (json_object_set_new(root, "version", version) == 0) &&
                   (json_object_set_new(root, "created", created) == 0) &&
-		  (json_object_set_new(root, "maxnodes", maxnodes) == 0) &&
+                  (json_object_set_new(root, "maxnodes", maxnodes) == 0) &&
                   (json_object_set_new(root, "nodes", objs) == 0)
                   )
                 {
                  if (json_dumpf(root, st, JSON_INDENT(2)) != 0)
-		   err++;
-		}
-	      else
-		err++;
+                   err++;
+                }
+              else
+                err++;
 
 	      json_decref(root);
 	    }

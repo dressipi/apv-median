@@ -64,6 +64,8 @@ static void test_median_array(size_t n, const double *v, double x, double eps)
   CU_ASSERT_ERRNO(0);
   CU_ASSERT_NOT_EQUAL(m, 0);
   CU_ASSERT_DOUBLE_EQUAL(m, x, eps);
+
+  histogram_destroy(hist);
 }
 
 
