@@ -173,7 +173,7 @@ static int node_print_json(json_t *objs, node_t *node)
   json_object_set_new(obj, "max", json_real(node->bin.max));
   json_object_set_new(obj, "count", json_real(node->bin.count));
 
-  json_array_append(objs, obj);
+  json_array_append_new(objs, obj);
 
   return 0;
 }
