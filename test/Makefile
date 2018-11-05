@@ -14,6 +14,9 @@ include ../Common.mk
 run: suite
 	./suite -v
 
+memcheck: suite
+	valgrind --leak-check=full ./suite -v
+
 suite: $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o suite
 
