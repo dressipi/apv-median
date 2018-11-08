@@ -3592,6 +3592,7 @@ cat >>confdefs.h <<_ACEOF
 #define CUNIT_213 $cunit213
 _ACEOF
 
+   prefix="$PWD/tmp"
 fi
 
 

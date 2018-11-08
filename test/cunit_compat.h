@@ -13,7 +13,7 @@
 #define CUNIT_COMPAT_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <apv-median/config.h>
 #endif
 
 /* default to 2.1-2 or earlier (for now) */

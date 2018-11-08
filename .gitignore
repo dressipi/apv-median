@@ -1,6 +1,7 @@
 config.log
 config.status
 autom4te.cache
+tmp
 Common.mk
 src/config.h
 src/*.o

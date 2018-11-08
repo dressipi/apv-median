@@ -18,7 +18,7 @@ uninstall:
 
 ifeq ($(strip $(WITH_UNIT)),1)
 
-test: all
+test: install
 	make -C test run
 
 else
@@ -43,7 +43,7 @@ spotless-cwd: clean-cwd
 	$(RM) $(CONFFILES)
 	autoconf
 	rm -rf autom4te.cache/
-
+	rm -rf tmp/
 
 spotless-subdirs:
 	for subdir in $(SUBDIRS) ; do $(MAKE) -C $$subdir spotless ; done
