@@ -166,7 +166,7 @@ static void test_median_dist(double (*f)(void), double eps)
 
 extern void test_median_uniform(void)
 {
-  test_median_dist(rand_uniform, 5e-3);
+  test_median_dist(rand_uniform, 1e-2);
 }
 
 
