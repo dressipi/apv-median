@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
   if (options(argc, argv, &opt) != 0)
     {
-      fprintf(stderr,"failed to parse command line\n");
+      fprintf(stderr, "failed to parse command line\n");
       return EXIT_FAILURE;
     }
 
