@@ -21,7 +21,7 @@ uninstall:
 
 ifeq ($(strip $(WITH_UNIT)),1)
 
-test: install
+test:
 	make -C test run
 
 else

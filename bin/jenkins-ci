@@ -4,4 +4,4 @@ set -e
 
 sudo yum install jansson-devel -y
 ./configure --enable-tests
-make test
+make all install test
