@@ -36,7 +36,7 @@ const char *gengetopt_args_info_description = "";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help     Print help and exit",
   "  -V, --version  Print version and exit",
-  "  -v, --verbose  verbose operation  (default=off)",
+  "  -v, --verbose  Verbose operation  (default=off)",
     0
 };
 
@@ -452,7 +452,7 @@ options_internal (
           options_free (&local_args_info);
           exit (EXIT_SUCCESS);
 
-        case 'v':	/* verbose operation.  */
+        case 'v':	/* Verbose operation.  */
         
         
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),

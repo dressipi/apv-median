@@ -39,8 +39,8 @@ struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  int verbose_flag;	/**< @brief verbose operation (default=off).  */
-  const char *verbose_help; /**< @brief verbose operation help description.  */
+  int verbose_flag;	/**< @brief Verbose operation (default=off).  */
+  const char *verbose_help; /**< @brief Verbose operation help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */

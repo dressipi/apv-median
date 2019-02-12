@@ -1,4 +1,4 @@
-SUBDIRS = percentile
+SUBDIRS = median
 
 all: build install
 
