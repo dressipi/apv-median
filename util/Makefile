@@ -1,6 +1,6 @@
 SUBDIRS = median
 
-all: build install
+all: build
 
 build:
 	for dir in $(SUBDIRS) ; do make -C $$dir build ; done

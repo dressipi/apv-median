@@ -10,6 +10,9 @@
 #include <errno.h>
 #include <float.h>
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <jansson.h>
 
 #include "histogram.h"
@@ -60,7 +63,6 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist->bins);
   free(hist);
 }
-
 
 /*  save to and load from JSON */
 
@@ -148,25 +150,48 @@ extern histogram_t* histogram_json_load_stream(FILE *st)
   return hist;
 }
 
+/* see note on histogram_json_save() */
+
 extern histogram_t* histogram_json_load(const char *path)
 {
-  FILE *st;
+  int fd, err = 0;
+  histogram_t *hist = NULL;
 
-  if ((st = fopen(path, "r")) == NULL)
-    return NULL;
-
-  histogram_t *hist = histogram_json_load_stream(st);
-
-  if (fclose(st) == EOF)
+  if ((fd = open(path, O_RDONLY)) >= 0)
     {
-      if (hist != NULL)
-        histogram_destroy(hist);
+      if (lockf(fd, F_LOCK, 0) == 0)
+	{
+	  FILE *st;
 
+	  if ((st = fdopen(fd, "r")) != NULL)
+	    {
+	      hist = histogram_json_load_stream(st);
+	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
+	      if (fclose(st) == EOF) err++;
+	    }
+	  else
+	    {
+	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
+	      if (close(fd) != 0) err++;
+	    }
+	}
+      else
+	{
+	  err++;
+	  if (close(fd) != 0) err++;
+	}
+    }
+  else err++;
+
+  if (err)
+    {
+      if (hist)	histogram_destroy(hist);
       return NULL;
     }
 
   return hist;
 }
+
 
 static int node_print_json(json_t *objs, node_t *node)
 {
@@ -262,21 +287,47 @@ extern int histogram_json_save_stream(const histogram_t* hist, FILE *st)
   return err;
 }
 
-extern int histogram_json_save(const histogram_t* hist, const char *path)
+/*
+  Write the histogram in JSON format to the specified path, this
+  acquires a file lock via lockf(2) which is exclusive to the
+  *process*, multiple threads share the lock so should use a
+  mutex to avoid collisions.  In the case that another process
+  has a lock on this file then this function will block.
+*/
+
+extern int histogram_json_save(const histogram_t *hist, const char *path)
 {
-  FILE *st;
+  int fd, err = 0;
 
-  if ((st = fopen(path, "w")) == NULL)
-    return 1;
+  if ((fd = open(path, O_CREAT | O_RDWR | O_TRUNC, 0644)) >= 0)
+    {
+      if (lockf(fd, F_LOCK, 0) == 0)
+	{
+	  FILE *st;
 
-  int err = histogram_json_save_stream(hist, st);
-
-  if (fclose(st) == EOF)
-    return 1;
+	  if ((st = fdopen(fd, "w")) != NULL)
+	    {
+	      err = histogram_json_save_stream(hist, st);
+	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
+	      if (fclose(st) == EOF) err++;
+	    }
+	  else
+	    {
+	      err++;
+	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
+	      if (close(fd) != 0) err++;
+	    }
+	}
+      else
+	{
+	  err++;
+	  if (close(fd) != 0) err++;
+	}
+    }
+  else err++;
 
   return err;
 }
-
 
 /*
   it is convenient for the median calculation to dump the
