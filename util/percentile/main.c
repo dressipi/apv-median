@@ -4,10 +4,9 @@
 #include <float.h>
 
 #include <histogram.h>
+#include <median.h>
 
 #include "options.h"
-
-#define PATH_LEN 128
 
 int main(int argc, char **argv)
 {
@@ -33,6 +32,16 @@ int main(int argc, char **argv)
       fprintf(stderr, "failed to read histogram from %s\n", path);
       return EXIT_FAILURE;
     }
+
+  double value;
+
+  if (median(hist, &value) != 0)
+    {
+      fprintf(stderr, "error calculating median\n");
+      return EXIT_FAILURE;
+    }
+
+  printf("%g\n", value);
 
   return EXIT_SUCCESS;
 }

@@ -1,4 +1,4 @@
 # gengetopt input for percentile
-package "percentile"
-purpose "Print percentile value of serialised histogram"
-option "percentile" p "desired percentile" float optional default="50"
+package "median"
+purpose "Print median value of serialised histogram"
+option "verbose" v "Verbose operation" flag off

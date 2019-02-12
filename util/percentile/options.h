@@ -21,12 +21,12 @@ extern "C" {
 
 #ifndef OPTIONS_PACKAGE
 /** @brief the program name (used for printing errors) */
-#define OPTIONS_PACKAGE "percentile"
+#define OPTIONS_PACKAGE "median"
 #endif
 
 #ifndef OPTIONS_PACKAGE_NAME
 /** @brief the complete program name (used for help and version) */
-#define OPTIONS_PACKAGE_NAME "percentile"
+#define OPTIONS_PACKAGE_NAME "median"
 #endif
 
 #ifndef OPTIONS_VERSION
@@ -39,13 +39,12 @@ struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  float percentile_arg;	/**< @brief desired percentile (default='50').  */
-  char * percentile_orig;	/**< @brief desired percentile original value given at command line.  */
-  const char *percentile_help; /**< @brief desired percentile help description.  */
+  int verbose_flag;	/**< @brief verbose operation (default=off).  */
+  const char *verbose_help; /**< @brief verbose operation help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
-  unsigned int percentile_given ;	/**< @brief Whether percentile was given.  */
+  unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

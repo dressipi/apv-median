@@ -25,23 +25,23 @@
 
 #include "options.h"
 
-const char *gengetopt_args_info_purpose = "Print percentile value of serialised histogram";
+const char *gengetopt_args_info_purpose = "Print median value of serialised histogram";
 
-const char *gengetopt_args_info_usage = "Usage: percentile [OPTIONS]... [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: median [OPTIONS]... [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help              Print help and exit",
-  "  -V, --version           Print version and exit",
-  "  -p, --percentile=FLOAT  desired percentile  (default=`50')",
+  "  -h, --help     Print help and exit",
+  "  -V, --version  Print version and exit",
+  "  -v, --verbose  verbose operation  (default=off)",
     0
 };
 
 typedef enum {ARG_NO
-  , ARG_FLOAT
+  , ARG_FLAG
 } options_arg_type;
 
 static
@@ -62,15 +62,14 @@ void clear_given (struct gengetopt_args_info *args_info)
 {
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
-  args_info->percentile_given = 0 ;
+  args_info->verbose_given = 0 ;
 }
 
 static
 void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
-  args_info->percentile_arg = 50;
-  args_info->percentile_orig = NULL;
+  args_info->verbose_flag = 0;
   
 }
 
@@ -81,7 +80,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
 
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
-  args_info->percentile_help = gengetopt_args_info_help[2] ;
+  args_info->verbose_help = gengetopt_args_info_help[2] ;
   
 }
 
@@ -153,22 +152,12 @@ options_params_create(void)
   return params;
 }
 
-static void
-free_string_field (char **s)
-{
-  if (*s)
-    {
-      free (*s);
-      *s = 0;
-    }
-}
 
 
 static void
 options_release (struct gengetopt_args_info *args_info)
 {
   unsigned int i;
-  free_string_field (&(args_info->percentile_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -208,8 +197,8 @@ options_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "help", 0, 0 );
   if (args_info->version_given)
     write_into_file(outfile, "version", 0, 0 );
-  if (args_info->percentile_given)
-    write_into_file(outfile, "percentile", args_info->percentile_orig, 0);
+  if (args_info->verbose_given)
+    write_into_file(outfile, "verbose", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -375,28 +364,18 @@ int update_arg(void *field, char **orig_field,
     val = possible_values[found];
 
   switch(arg_type) {
-  case ARG_FLOAT:
-    if (val) *((float *)field) = (float)strtod (val, &stop_char);
+  case ARG_FLAG:
+    *((int *)field) = !*((int *)field);
     break;
   default:
     break;
   };
 
-  /* check numeric conversion */
-  switch(arg_type) {
-  case ARG_FLOAT:
-    if (val && !(stop_char && *stop_char == '\0')) {
-      fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
-      return 1; /* failure */
-    }
-    break;
-  default:
-    ;
-  };
 
   /* store the original value */
   switch(arg_type) {
   case ARG_NO:
+  case ARG_FLAG:
     break;
   default:
     if (value && orig_field) {
@@ -453,11 +432,11 @@ options_internal (
       static struct option long_options[] = {
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
-        { "percentile",	1, NULL, 'p' },
+        { "verbose",	0, NULL, 'v' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVp:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVv", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -473,14 +452,12 @@ options_internal (
           options_free (&local_args_info);
           exit (EXIT_SUCCESS);
 
-        case 'p':	/* desired percentile.  */
+        case 'v':	/* verbose operation.  */
         
         
-          if (update_arg( (void *)&(args_info->percentile_arg), 
-               &(args_info->percentile_orig), &(args_info->percentile_given),
-              &(local_args_info.percentile_given), optarg, 0, "50", ARG_FLOAT,
-              check_ambiguity, override, 0, 0,
-              "percentile", 'p',
+          if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
+              &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "verbose", 'v',
               additional_error))
             goto failure;
         
