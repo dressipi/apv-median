@@ -1,0 +1,6 @@
+configure linguist-generated=true
+src/config.h.in linguist-generated=true
+examples/*/dumper/options.c linguist-generated=true
+examples/*/dumper/options.h linguist-generated=true
+util/median/options.c linguist-generated=true
+util/median/options.h linguist-generated=true
