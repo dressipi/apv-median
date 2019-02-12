@@ -2,18 +2,21 @@ default: all
 
 include Common.mk
 
-SUBDIRS = src test
+SUBDIRS = src test util
 RUBBISH = *~ tmp/*.log
 CONFFILES = Common.mk config.cache config.log config.status
 
 all:
 	make -C src all
+	make -C util all
 
 install:
 	make -C src install
+	make -C util install
 
 uninstall:
 	make -C src uninstall
+	make -C util uninstall
 
 
 ifeq ($(strip $(WITH_UNIT)),1)
