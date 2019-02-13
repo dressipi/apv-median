@@ -159,9 +159,13 @@ extern histogram_t* histogram_json_load(const char *path)
 
   if ((fd = open(path, O_RDWR)) >= 0)
     {
+      printf("\n path %s, fd %i\n", path, fd);
+
       if (lockf(fd, F_LOCK, 0) == 0)
 	{
 	  FILE *st;
+
+	  printf("locked\n");
 
 	  if ((st = fdopen(fd, "r")) != NULL)
 	    {
@@ -177,6 +181,8 @@ extern histogram_t* histogram_json_load(const char *path)
 	}
       else
 	{
+	  printf("lock failed: errno %i, %s\n", errno, strerror(errno));
+
 	  err++;
 	  if (close(fd) != 0) err++;
 	}
