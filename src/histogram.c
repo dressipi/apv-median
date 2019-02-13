@@ -64,7 +64,7 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist);
 }
 
-/*  save to and load from JSON */
+/* save to and load from JSON */
 
 extern histogram_t* histogram_json_load_stream(FILE *st)
 {
@@ -157,7 +157,7 @@ extern histogram_t* histogram_json_load(const char *path)
   int fd, err = 0;
   histogram_t *hist = NULL;
 
-  if ((fd = open(path, O_RDONLY)) >= 0)
+  if ((fd = open(path, O_RDWR)) >= 0)
     {
       if (lockf(fd, F_LOCK, 0) == 0)
 	{
