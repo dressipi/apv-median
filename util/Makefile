@@ -1,4 +1,4 @@
-SUBDIRS = median
+SUBDIRS = histogram-median
 
 all: build
 

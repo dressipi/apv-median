@@ -1,4 +1,4 @@
-NAME = median
+NAME = histogram-median
 
 default: $(NAME)
 

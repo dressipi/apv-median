@@ -27,7 +27,7 @@
 
 const char *gengetopt_args_info_purpose = "Print median value of serialised histogram";
 
-const char *gengetopt_args_info_usage = "Usage: median [OPTIONS]... [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: histogram-median [OPTIONS]... [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 

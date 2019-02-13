@@ -21,12 +21,12 @@ extern "C" {
 
 #ifndef OPTIONS_PACKAGE
 /** @brief the program name (used for printing errors) */
-#define OPTIONS_PACKAGE "median"
+#define OPTIONS_PACKAGE "histogram-median"
 #endif
 
 #ifndef OPTIONS_PACKAGE_NAME
 /** @brief the complete program name (used for help and version) */
-#define OPTIONS_PACKAGE_NAME "median"
+#define OPTIONS_PACKAGE_NAME "histogram-median"
 #endif
 
 #ifndef OPTIONS_VERSION
