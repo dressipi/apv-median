@@ -299,24 +299,28 @@ extern int histogram_json_save(const histogram_t *hist, const char *path)
 {
   int fd, err = 0;
 
-  if ((fd = open(path, O_CREAT | O_RDWR | O_TRUNC, 0644)) >= 0)
+  if ((fd = open(path, O_CREAT | O_RDWR, 0644)) >= 0)
     {
       if (lockf(fd, F_LOCK, 0) == 0)
 	{
-	  FILE *st;
+	  if (ftruncate(fd, 0) == 0)
+	    {
+	      FILE *st;
 
-	  if ((st = fdopen(fd, "w")) != NULL)
-	    {
-	      err = histogram_json_save_stream(hist, st);
-	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
-	      if (fclose(st) == EOF) err++;
+	      if ((st = fdopen(fd, "w")) != NULL)
+		{
+		  err = histogram_json_save_stream(hist, st);
+		  if (lockf(fd, F_ULOCK, 0) < 0) err++;
+		  if (fclose(st) == EOF) err++;
+		}
+	      else
+		{
+		  err++;
+		  if (lockf(fd, F_ULOCK, 0) < 0) err++;
+		  if (close(fd) != 0) err++;
+		}
 	    }
-	  else
-	    {
-	      err++;
-	      if (lockf(fd, F_ULOCK, 0) < 0) err++;
-	      if (close(fd) != 0) err++;
-	    }
+	  else err++;
 	}
       else
 	{
