@@ -8,4 +8,4 @@ further details.
 This code need the [Jannson][1] library for serialisation of the
 histogram structure to JSON.
 
-[1] http://www.digip.org/jansson/
+[1]: http://www.digip.org/jansson/
