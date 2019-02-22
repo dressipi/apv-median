@@ -51,14 +51,13 @@ the new median.
 One could make this idea precise with a "number of new data points
 which must be added to the histogram before it gets half-way to
 the new median" (rather similar to the concept of
-[half-width at half-maximum](https://en.wikipedia.org/wiki/Full_width_at_half_maximum)
-used in signal processing), estimate these empirically for a set of
-values of the starting median, ending median, variance, number of
-bins; try to get a simple formula which gets close to these numbers
-and so on.
+[half-width at half-maximum][1] used in signal processing), estimate
+these empirically for a set of values of the starting median, ending
+median, variance, number of bins; try to get a simple formula which
+gets close to these numbers and so on.
 
 In terms of implementation in the library, we add a function
-```
+``` C
 int histogram_capacity(histogram_t *hist, double c);
 ```
 to `histogram.c` which performs this scaling to capacity `c`, and
@@ -67,3 +66,5 @@ The reason is that we will generally have data points in groups
 (the scores for many garments for a single user), so it is
 convenient to add all of those at once, the perform the scaling
 once when done.
+
+[1]: https://en.wikipedia.org/wiki/Full_width_at_half_maximum
