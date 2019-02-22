@@ -3,7 +3,7 @@
 
   Some helpwe methods for erron assertions in tests
 
-  Copyright (c) Dressipi 2018
+  Copyright (c) Stylemania Ltd. 2018
 */
 
 #include "assert_errno.h"
