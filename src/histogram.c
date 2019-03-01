@@ -1,6 +1,6 @@
 /*
   histogram.c
-  Copyright (c) Dressipi 2018
+  Copyright (c) Stylemania Ltd. 2018
 */
 
 #include <math.h>

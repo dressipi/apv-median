@@ -1,6 +1,6 @@
 /*
   node.h
-  Copyright (c) J.J. Green 2018
+  Copyright (c) Stylemania Ltd. 2018
 */
 
 #ifndef NODE_H
