@@ -1,6 +1,6 @@
 LIB = libapvmedian.a
-OBJ = histogram.o median.o node.o
-HDR = bin.h config.h histogram.h median.h node.h
+OBJ = histogram.o median.o node.o percentile.o
+HDR = bin.h config.h histogram.h median.h node.h percentile.h
 
 default : all
 
