@@ -15,7 +15,7 @@ extern int percentile(const histogram_t *hist, double percent, double *value)
 
   size_t k = histogram_num_bins(hist);
   bin_t *bins = histogram_bins(hist);
-  double total = 0.0;
+  double total = 0.0, fraction = percent / 100.0;
 
   for (size_t i = 0 ; i < k ; i++)
     total += bins[i].count;
@@ -29,7 +29,7 @@ extern int percentile(const histogram_t *hist, double percent, double *value)
       double
 	max = bins[i].max,
 	count = bins[i].count,
-	x = min + ((percent / 100.0) - partial) * (max - min) / count;
+	x = min + ((total * fraction) - partial) * (max - min) / count;
 
       if (x < max)
 	{

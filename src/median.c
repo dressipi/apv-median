@@ -3,9 +3,6 @@
   Copyright (c) Stylemania Ltd. 2018
 */
 
-#include <string.h>
-#include <math.h>
-
 #include "median.h"
 #include "percentile.h"
 
