@@ -18,6 +18,7 @@ CU_TestInfo tests_percentile[] =
     {"uniform in [0, 1]", test_percentile_uniform},
     {"half-Gaussian", test_percentile_half_gaussian},
     {"non-decreasing", test_percentile_non_decreasing},
+    {"single bin", test_percentile_single_bin},
     CU_TEST_INFO_NULL,
   };
 
@@ -216,6 +217,29 @@ extern void test_percentile_non_decreasing(void)
       CU_ASSERT_EQUAL(percentile(hist, i, &p), 0);
       CU_ASSERT(p >= last);
       last = p;
+    }
+
+  histogram_destroy(hist);
+}
+
+extern void test_percentile_single_bin(void)
+{
+  CU_CLEAR_ERRNO();
+
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  int res = histogram_add(hist, 1.0);
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_EQUAL(res, 0);
+
+  for (int i = 0 ; i < 100 ; i++)
+    {
+      double p;
+      CU_ASSERT_EQUAL(percentile(hist, i, &p), 0);
+      CU_ASSERT_DOUBLE_EQUAL(p, i / 100.0, 1e-5);
     }
 
   histogram_destroy(hist);
