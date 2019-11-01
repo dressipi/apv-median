@@ -11,8 +11,6 @@
 extern CU_TestInfo tests_percentile[];
 
 extern void test_percentile_small_permutations(void);
-extern void test_percentile_small_equal(void);
-extern void test_percentile_large_equal(void);
 extern void test_percentile_uniform(void);
 extern void test_percentile_half_gaussian(void);
 extern void test_percentile_non_decreasing(void);

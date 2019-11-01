@@ -13,8 +13,6 @@
 CU_TestInfo tests_percentile[] =
   {
     {"small permutations", test_percentile_small_permutations},
-    {"small equal", test_percentile_small_equal},
-    {"large equal", test_percentile_large_equal},
     {"uniform in [0, 1]", test_percentile_uniform},
     {"half-Gaussian", test_percentile_half_gaussian},
     {"non-decreasing", test_percentile_non_decreasing},
@@ -36,6 +34,9 @@ static double percentile_exact(size_t n, const double *v, double percent)
 
   memcpy(w, v, n * sizeof(double));
   qsort(w, n, sizeof(double), dbl_cmp);
+
+  if (percent == 100.0)
+    return w[n-1];
 
   double p = n * (percent / 100.0);
   size_t m = floor(p);
@@ -79,13 +80,7 @@ static void test_percentile_array(size_t n, const double *v, double percent,
 /*
   For the input data 1, 2, 3, the algorithm generated
   a CDF which is y = x, for x in [0, 3], and we have
-  the 0.5-quartile at y = 3/2 which is x = 3/2 (while
-  the percentile is 2, of course).
-
-  This is a approximation algorithm, so bad appriximations
-  at small counts and atypical distributions is expected,
-  this test, rather, is to check for invariance under
-  permutations
+  the 66.6th percentile at y = 2 which is x = 2
 */
 
 extern void test_percentile_small_permutations(void)
@@ -99,40 +94,11 @@ extern void test_percentile_small_permutations(void)
     {3, 2, 1}
   };
 
+  double p = 200.0 / 3;
+
   for (size_t i = 0 ; i < 6 ; i++)
-    test_percentile_array(3, v[i], 50.0, 1.5, 1e-6);
+    test_percentile_array(3, v[i], p, 2, 1e-6);
 }
-
-
-/*
-  Equal value input are the worst case for this algorithm,
-  since the retruned value will always be exactly half the
-  true percentile; but a useful test to stress for edge-case
-  behaviour.
-*/
-
-static void test_percentile_equal(size_t n)
-{
-  double v[n], t[3] = {1e-5, 1.0, 1e5};
-
-  for (size_t i = 0 ; i < 3 ; i++)
-    {
-      for (size_t j = 0 ; j < n ; j++)
-	v[j] = t[i];
-      test_percentile_array(n, v, 50.0, t[i] / 2, 1e-6);
-    }
-}
-
-extern void test_percentile_small_equal(void)
-{
-  test_percentile_equal(4);
-}
-
-extern void test_percentile_large_equal(void)
-{
-  test_percentile_equal(40);
-}
-
 
 /* more realistic tests for random distibutions */
 
@@ -235,11 +201,11 @@ extern void test_percentile_single_bin(void)
   CU_ASSERT_ERRNO(0);
   CU_ASSERT_EQUAL(res, 0);
 
-  for (int i = 0 ; i < 100 ; i++)
+  for (int i = 0 ; i <= 100 ; i++)
     {
       double p;
       CU_ASSERT_EQUAL(percentile(hist, i, &p), 0);
-      CU_ASSERT_DOUBLE_EQUAL(p, i / 100.0, 1e-5);
+      CU_ASSERT_DOUBLE_EQUAL(p, i / 100.0, 1e-8);
     }
 
   histogram_destroy(hist);
