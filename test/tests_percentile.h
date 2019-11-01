@@ -15,5 +15,6 @@ extern void test_percentile_uniform(void);
 extern void test_percentile_half_gaussian(void);
 extern void test_percentile_non_decreasing(void);
 extern void test_percentile_single_bin(void);
+extern void test_percentile_domain_error(void);
 
 #endif

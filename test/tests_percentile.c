@@ -18,6 +18,7 @@ CU_TestInfo tests_percentile[] =
     {"half-Gaussian", test_percentile_half_gaussian},
     {"non-decreasing", test_percentile_non_decreasing},
     {"single bin", test_percentile_single_bin},
+    {"domain error", test_percentile_domain_error},
     CU_TEST_INFO_NULL,
   };
 
@@ -72,6 +73,15 @@ extern void test_percentile_small_permutations(void)
     test_percentile_array(3, v[i], p, 2, 1e-6);
 }
 
+
+/*
+  confirm accuracy (to epsilon) for realistic random data, it is
+  interesting to note that we need a larger epsilon for the 75th
+  percentile for the half-gaussian, this kind-of make sense since
+  the histogram will have a shallower gradient there, so inaccuracy
+  in the percentile will be amplified ...
+*/
+
 static void test_percentile_dist(double (*f)(void), double percent, double eps)
 {
   size_t n = 1024;
@@ -85,6 +95,7 @@ static void test_percentile_dist(double (*f)(void), double percent, double eps)
 
   test_percentile_array(n, v, percent, exact, eps);
 }
+
 
 /* uniform in [0, 1] */
 
@@ -105,7 +116,8 @@ extern void test_percentile_half_gaussian(void)
   test_percentile_dist(rand_half_gaussian, 75, 4e-2);
 }
 
-/* non-decreasing with percentile */
+
+/* result is non-decreasing with increasing percentile */
 
 extern void test_percentile_non_decreasing(void)
 {
@@ -139,6 +151,13 @@ extern void test_percentile_non_decreasing(void)
   histogram_destroy(hist);
 }
 
+
+/*
+  confirm that an out-of-bounds percent value returns non-zero,
+  sets errno to EDOM and does not modify the value to which the
+  result would have been assigned.
+*/
+
 extern void test_percentile_single_bin(void)
 {
   CU_CLEAR_ERRNO();
@@ -160,4 +179,27 @@ extern void test_percentile_single_bin(void)
     }
 
   histogram_destroy(hist);
+}
+
+static void percentile_domain_error(double percent)
+{
+  CU_CLEAR_ERRNO();
+
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  double value = 43.0;
+  int res = percentile(hist, percent, &value);
+
+  CU_ASSERT_ERRNO(EDOM);
+  CU_ASSERT_NOT_EQUAL(res, 0);
+  CU_ASSERT_DOUBLE_EQUAL(value, 43.0, 1e-12);
+}
+
+extern void test_percentile_domain_error(void)
+{
+  percentile_domain_error(-1.0);
+  percentile_domain_error(101.0);
 }

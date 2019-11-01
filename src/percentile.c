@@ -1,17 +1,22 @@
 /*
   percentile.c
-  Copyright (c) Stylemania Ltd. 2018, 2019
+  Copyright (c) Stylemania Ltd. 2019
 */
+
+#include "percentile.h"
 
 #include <string.h>
 #include <math.h>
 
-#include "percentile.h"
+#include <errno.h>
 
 extern int percentile(const histogram_t *hist, double percent, double *value)
 {
   if ((percent < 0.0) || (percent > 100.0))
-    return 1;
+    {
+      errno = EDOM;
+      return 1;
+    }
 
   size_t k = histogram_num_bins(hist);
   bin_t *bins = histogram_bins(hist);
