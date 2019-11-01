@@ -1,3 +1,8 @@
+/*
+  helpers.c
+  Copyright (c) Stylemania 2019
+*/
+
 #include <math.h>
 #include <string.h>
 
