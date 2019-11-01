@@ -5,6 +5,7 @@
 
 #include <apv-median/percentile.h>
 
+#include "helpers.h"
 #include "assert_errno.h"
 #include "tests_percentile.h"
 
@@ -19,34 +20,6 @@ CU_TestInfo tests_percentile[] =
     {"single bin", test_percentile_single_bin},
     CU_TEST_INFO_NULL,
   };
-
-/* helper functions */
-
-static int dbl_cmp(const void *a, const void *b)
-{
-  const double *da = a, *db = b;
-  return (*da > *db) - (*da < *db);
-}
-
-static double percentile_exact(size_t n, const double *v, double percent)
-{
-  double w[n];
-
-  memcpy(w, v, n * sizeof(double));
-  qsort(w, n, sizeof(double), dbl_cmp);
-
-  if (percent == 100.0)
-    return w[n-1];
-
-  double p = n * (percent / 100.0);
-  size_t m = floor(p);
-  double f = p - m;
-
-  if (f > 0)
-    return w[m] * (1 - f) + w[m + 1] * f;
-  else
-    return w[m];
-}
 
 static void test_percentile_array(size_t n, const double *v, double percent,
                                   double x, double eps)
@@ -76,11 +49,10 @@ static void test_percentile_array(size_t n, const double *v, double percent,
   histogram_destroy(hist);
 }
 
-
 /*
-  For the input data 1, 2, 3, the algorithm generated
-  a CDF which is y = x, for x in [0, 3], and we have
-  the 66.6th percentile at y = 2 which is x = 2
+  For the input data 1, 2, 3, the algorithm generated a CDF which is
+  y = x, for x in [0, 3], and we have the 66.6th percentile at y = 2
+  which is x = 2
 */
 
 extern void test_percentile_small_permutations(void)
@@ -100,26 +72,6 @@ extern void test_percentile_small_permutations(void)
     test_percentile_array(3, v[i], p, 2, 1e-6);
 }
 
-/* more realistic tests for random distibutions */
-
-static double rand_uniform(void)
-{
-  return (double)rand() / RAND_MAX;
-}
-
-static double rand_half_gaussian(void)
-{
-  double
-    u1 = rand_uniform(),
-    u2 = rand_uniform(),
-    R = sqrt(-log(u1)),
-    t = M_PI * u2;
-
-  /* this is Box-Muller */
-
-  return R * sin(t);
-}
-
 static void test_percentile_dist(double (*f)(void), double percent, double eps)
 {
   size_t n = 1024;
@@ -133,7 +85,6 @@ static void test_percentile_dist(double (*f)(void), double percent, double eps)
 
   test_percentile_array(n, v, percent, exact, eps);
 }
-
 
 /* uniform in [0, 1] */
 

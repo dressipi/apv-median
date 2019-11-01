@@ -10,7 +10,7 @@
 
 extern int percentile(const histogram_t *hist, double percent, double *value)
 {
-  if ((percent < 0) || (percent > 100))
+  if ((percent < 0.0) || (percent > 100.0))
     return 1;
 
   size_t k = histogram_num_bins(hist);
@@ -22,7 +22,9 @@ extern int percentile(const histogram_t *hist, double percent, double *value)
       return 0;
     }
 
-  double total = 0.0, fraction = percent / 100.0;
+  double
+    total = 0.0,
+    fraction = percent / 100.0;
 
   for (size_t i = 0 ; i < k ; i++)
     total += bins[i].count;
@@ -47,13 +49,6 @@ extern int percentile(const histogram_t *hist, double percent, double *value)
       partial += count;
       min = max;
     }
-
-  /*
-    We should never reach here, since a percentile of any
-    non-empty set of numbers should be between the min
-    and max values (possibly equal to, in the degenerate
-    case of equal values).
-   */
 
   return 1;
 }

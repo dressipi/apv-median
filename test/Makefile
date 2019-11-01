@@ -1,6 +1,6 @@
 # Makefile for CUnit test-suite
 
-OBJ = main.o tests.o assert_errno.o \
+OBJ = main.o tests.o assert_errno.o helpers.o \
 	tests_histogram.o \
 	tests_median.o \
 	tests_node.o \
