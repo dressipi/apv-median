@@ -6,9 +6,9 @@ OBJ = main.o tests.o assert_errno.o helpers.o \
 	tests_node.o \
 	tests_percentile.o
 RUBBISH += $(OBJ) suite *~
-CFLAGS += -I../tmp/include
+CFLAGS += -I./include
 LDLIBS += -lapvmedian -lm
-LDFLAGS += -L../tmp/lib
+LDFLAGS += -L./lib
 
 default: run
 

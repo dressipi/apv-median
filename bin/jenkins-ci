@@ -8,7 +8,6 @@ sudo yum install jansson-devel -y
 
 make --quiet clean
 make all
-make --quiet install
 make test
 make --quiet clean
 
