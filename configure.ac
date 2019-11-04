@@ -1,5 +1,5 @@
 AC_INIT([libavpmedian],
-	[0.2],
+	[0.3],
   	[jim.green@dressipi.com],
 	[libavpmedian],
 	[https://dressipi.com/])
@@ -81,7 +81,6 @@ if test $opt_enable_tests = yes; then
    AC_DEFINE_UNQUOTED(CUNIT_213,
      $cunit213,
      [Define if CUnit version 2.1-3 or later])
-   prefix="$PWD/tmp"
 fi
 
 dnl | output

@@ -3,9 +3,9 @@
 OBJ = main.o tests.o assert_errno.o \
 	tests_histogram.o tests_median.o tests_node.o
 RUBBISH += $(OBJ) suite *~
-CFLAGS += -I../tmp/include
+CFLAGS += -I./include
 LDLIBS += -lapvmedian -lm
-LDFLAGS += -L../tmp/lib
+LDFLAGS += -L./lib
 
 default: run
 
