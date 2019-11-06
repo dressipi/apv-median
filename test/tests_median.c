@@ -5,6 +5,7 @@
 
 #include <apv-median/median.h>
 
+#include "helpers.h"
 #include "assert_errno.h"
 #include "tests_median.h"
 
@@ -19,27 +20,6 @@ CU_TestInfo tests_median[] =
     {"half-Gaussian", test_median_half_gaussian},
     CU_TEST_INFO_NULL,
   };
-
-
-/* helper functions */
-
-static int dbl_cmp(const void *a, const void *b)
-{
-  const double *da = a, *db = b;
-  return (*da > *db) - (*da < *db);
-}
-
-static double median_exact(size_t n, const double *v)
-{
-  double w[n];
-
-  memcpy(w, v, n * sizeof(double));
-  qsort(w, n, sizeof(double), dbl_cmp);
-  if (n % 2)
-    return w[n/2];
-  else
-    return (w[n/2 - 1] + w[n/2]) / 2;
-}
 
 static void test_median_array(size_t n, const double *v, double x, double eps)
 {
@@ -124,27 +104,6 @@ extern void test_median_small_equal(void)
 extern void test_median_large_equal(void)
 {
   test_median_equal(40);
-}
-
-
-/* more realistic tests for random distibutions */
-
-static double rand_uniform(void)
-{
-  return (double)rand() / RAND_MAX;
-}
-
-static double rand_half_gaussian(void)
-{
-  double
-    u1 = rand_uniform(),
-    u2 = rand_uniform(),
-    R = sqrt(-log(u1)),
-    t = M_PI * u2;
-
-  /* this is Box-Muller */
-
-  return R * sin(t);
 }
 
 static void test_median_dist(double (*f)(void), double eps)

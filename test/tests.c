@@ -13,6 +13,7 @@
 #include "tests_histogram.h"
 #include "tests_median.h"
 #include "tests_node.h"
+#include "tests_percentile.h"
 
 #include "cunit_compat.h"
 
@@ -25,6 +26,7 @@ static CU_SuiteInfo suites[] =
     ENTRY("histogram", tests_histogram),
     ENTRY("median", tests_median),
     ENTRY("node", tests_node),
+    ENTRY("percentile", tests_percentile),
     CU_SUITE_INFO_NULL
   };
 

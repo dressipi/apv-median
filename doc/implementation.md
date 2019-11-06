@@ -51,7 +51,7 @@ equal areas.  So we end up with thin tall bins where the data
 is dense, short fat bins where it is sparse.
 
 Calculating the approximate median from this data-structure is
-straightforward, since it is just the 50% quartile of the
+straightforward, since it is just the 50th percentile of the
 cumulative density function of the histogram.  We walk through
 the nodes of the histogram, summing the counts until we find
 the bin which straddles this 50%, then perform an (inverse)
