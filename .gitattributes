@@ -1,4 +1,5 @@
 configure linguist-generated=true
+install-sh linguist-generated=true
 src/config.h.in linguist-generated=true
 examples/*/dumper/options.c linguist-generated=true
 examples/*/dumper/options.h linguist-generated=true
