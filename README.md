@@ -15,4 +15,6 @@ To compile, test and install
     make test
     make install
 
+![Build Status](https://ci.dressipi.com:3001/buildStatus/icon?job=apv-median)
+
 [1]: http://www.digip.org/jansson/
