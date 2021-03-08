@@ -55,8 +55,6 @@ static int
 options_internal (int argc, char **argv, struct gengetopt_args_info *args_info,
                         struct options_params *params, const char *additional_error);
 
-static int
-options_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
 
 static char *
 gengetopt_strdup (const char *s);
@@ -315,37 +313,9 @@ options2 (int argc, char **argv, struct gengetopt_args_info *args_info, int over
 int
 options_required (struct gengetopt_args_info *args_info, const char *prog_name)
 {
-  int result = EXIT_SUCCESS;
-
-  if (options_required2(args_info, prog_name, 0) > 0)
-    result = EXIT_FAILURE;
-
-  if (result == EXIT_FAILURE)
-    {
-      options_free (args_info);
-      exit (EXIT_FAILURE);
-    }
-  
-  return result;
-}
-
-int
-options_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error)
-{
-  int error_occurred = 0;
-  FIX_UNUSED (additional_error);
-
-  /* checks for required options */
-  if (! args_info->empty_value_given)
-    {
-      fprintf (stderr, "%s: '--empty-value' ('-e') option required%s\n", prog_name, (additional_error ? additional_error : ""));
-      error_occurred = 1;
-    }
-  
-  
-  /* checks for dependences among options */
-
-  return error_occurred;
+  FIX_UNUSED (args_info);
+  FIX_UNUSED (prog_name);
+  return EXIT_SUCCESS;
 }
 
 
@@ -547,10 +517,6 @@ options_internal (
 
 
 
-  if (check_required)
-    {
-      error_occurred += options_required2 (args_info, argv[0], additional_error);
-    }
 
   options_release (&local_args_info);
 
