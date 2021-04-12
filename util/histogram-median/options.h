@@ -41,10 +41,14 @@ struct gengetopt_args_info
   const char *version_help; /**< @brief Print version and exit help description.  */
   int verbose_flag;	/**< @brief Verbose operation (default=off).  */
   const char *verbose_help; /**< @brief Verbose operation help description.  */
+  char * empty_value_arg;	/**< @brief print value on empty histogram.  */
+  char * empty_value_orig;	/**< @brief print value on empty histogram original value given at command line.  */
+  const char *empty_value_help; /**< @brief print value on empty histogram help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
+  unsigned int empty_value_given ;	/**< @brief Whether empty-value was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

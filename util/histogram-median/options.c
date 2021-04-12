@@ -34,14 +34,16 @@ const char *gengetopt_args_info_versiontext = "";
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help     Print help and exit",
-  "  -V, --version  Print version and exit",
-  "  -v, --verbose  Verbose operation  (default=off)",
+  "  -h, --help                Print help and exit",
+  "  -V, --version             Print version and exit",
+  "  -v, --verbose             Verbose operation  (default=off)",
+  "  -e, --empty-value=STRING  print value on empty histogram",
     0
 };
 
 typedef enum {ARG_NO
   , ARG_FLAG
+  , ARG_STRING
 } options_arg_type;
 
 static
@@ -63,6 +65,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->verbose_given = 0 ;
+  args_info->empty_value_given = 0 ;
 }
 
 static
@@ -70,6 +73,8 @@ void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
   args_info->verbose_flag = 0;
+  args_info->empty_value_arg = NULL;
+  args_info->empty_value_orig = NULL;
   
 }
 
@@ -81,6 +86,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->verbose_help = gengetopt_args_info_help[2] ;
+  args_info->empty_value_help = gengetopt_args_info_help[3] ;
   
 }
 
@@ -152,12 +158,23 @@ options_params_create(void)
   return params;
 }
 
+static void
+free_string_field (char **s)
+{
+  if (*s)
+    {
+      free (*s);
+      *s = 0;
+    }
+}
 
 
 static void
 options_release (struct gengetopt_args_info *args_info)
 {
   unsigned int i;
+  free_string_field (&(args_info->empty_value_arg));
+  free_string_field (&(args_info->empty_value_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -199,6 +216,8 @@ options_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->verbose_given)
     write_into_file(outfile, "verbose", 0, 0 );
+  if (args_info->empty_value_given)
+    write_into_file(outfile, "empty-value", args_info->empty_value_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -334,6 +353,7 @@ int update_arg(void *field, char **orig_field,
   char *stop_char = 0;
   const char *val = value;
   int found;
+  char **string_field;
   FIX_UNUSED (field);
 
   stop_char = 0;
@@ -366,6 +386,14 @@ int update_arg(void *field, char **orig_field,
   switch(arg_type) {
   case ARG_FLAG:
     *((int *)field) = !*((int *)field);
+    break;
+  case ARG_STRING:
+    if (val) {
+      string_field = (char **)field;
+      if (!no_free && *string_field)
+        free (*string_field); /* free previous string */
+      *string_field = gengetopt_strdup (val);
+    }
     break;
   default:
     break;
@@ -433,10 +461,11 @@ options_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "verbose",	0, NULL, 'v' },
+        { "empty-value",	1, NULL, 'e' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVv", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVve:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -458,6 +487,18 @@ options_internal (
           if (update_arg((void *)&(args_info->verbose_flag), 0, &(args_info->verbose_given),
               &(local_args_info.verbose_given), optarg, 0, 0, ARG_FLAG,
               check_ambiguity, override, 1, 0, "verbose", 'v',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'e':	/* print value on empty histogram.  */
+        
+        
+          if (update_arg( (void *)&(args_info->empty_value_arg), 
+               &(args_info->empty_value_orig), &(args_info->empty_value_given),
+              &(local_args_info.empty_value_given), optarg, 0, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "empty-value", 'e',
               additional_error))
             goto failure;
         

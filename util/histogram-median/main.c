@@ -52,15 +52,32 @@ int main(int argc, char **argv)
 
   info("read histogram from %s\n", path);
 
-  double value;
-
-  if (median(hist, &value) != 0)
+  if (histogram_num_bins(hist) == 0)
     {
-      fprintf(stderr, "error calculating median\n");
-      return EXIT_FAILURE;
+      if (opt.empty_value_given)
+        {
+          info("median value: ");
+          printf("%s\n", opt.empty_value_arg);
+        }
+      else
+        {
+          fprintf(stderr, "empty histogram, median undefined\n");
+          return EXIT_FAILURE;
+        }
     }
+  else
+    {
+      double value;
 
-  info("median value: "); printf("%g\n", value);
+      if (median(hist, &value) != 0)
+        {
+          fprintf(stderr, "error calculating median\n");
+          return EXIT_FAILURE;
+        }
+
+      info("median value: ");
+      printf("%g\n", value);
+    }
 
   info("done.\n");
 

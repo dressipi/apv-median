@@ -5,3 +5,8 @@ tmp
 Common.mk
 src/config.h
 src/*.o
+src/libapvmedian.a
+util/histogram-median/histogram-median
+util/histogram-median/*.o
+test/suite
+test/*.o
