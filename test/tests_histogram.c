@@ -361,7 +361,6 @@ extern void test_histogram_empty_zero_counts(void)
 
   const char *path = "fixtures/zero-counts-all.json";
   histogram_t *hist = histogram_json_load(path);
-  double m;
 
   CU_ASSERT_ERRNO(0);
   CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
@@ -384,7 +383,6 @@ extern void test_histogram_empty_nonempty(void)
 
   const char *path = "fixtures/zero-counts-some.json";
   histogram_t *hist = histogram_json_load(path);
-  double m;
 
   CU_ASSERT_ERRNO(0);
   CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
