@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "bin.h"
 
@@ -23,5 +24,6 @@ extern histogram_t* histogram_json_load(const char*);
 extern histogram_t* histogram_json_load_stream(FILE*);
 extern int histogram_json_save(const histogram_t*, const char*);
 extern int histogram_json_save_stream(const histogram_t*, FILE*);
+extern bool histogram_empty(const histogram_t*);
 
 #endif
