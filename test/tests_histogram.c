@@ -28,6 +28,9 @@ CU_TestInfo tests_histogram[] =
     {"histogram capacity zero", test_histogram_capacity_zero},
     {"histogram capacity empty", test_histogram_capacity_empty},
     {"histogram capacity small", test_histogram_capacity_small},
+    {"histogram empty no nodes", test_histogram_empty_no_nodes},
+    {"histogram empty zero counts", test_histogram_empty_zero_counts},
+    {"histogram empty non-empty", test_histogram_empty_nonempty},
     CU_TEST_INFO_NULL,
   };
 
@@ -327,6 +330,64 @@ extern void test_histogram_capacity_small(void)
   CU_ASSERT_ERRNO(0);
 
   CU_ASSERT_DOUBLE_EQUAL(m1, m2, 1e-8);
+
+  histogram_destroy(hist);
+  CU_ASSERT_ERRNO(0);
+}
+
+extern void test_histogram_empty_no_nodes(void)
+{
+  CU_CLEAR_ERRNO();
+
+  histogram_t *hist = histogram_new(5);
+
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  CU_ASSERT_TRUE(histogram_empty(hist));
+
+  histogram_destroy(hist);
+  CU_ASSERT_ERRNO(0);
+}
+
+/*
+  we shouln't be able to create a histogram with all zero counts, but
+  one could load such from JSON (and that file might be hostile)
+*/
+
+extern void test_histogram_empty_zero_counts(void)
+{
+  CU_CLEAR_ERRNO();
+
+  const char *path = "fixtures/zero-counts-all.json";
+  histogram_t *hist = histogram_json_load(path);
+
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  CU_ASSERT_TRUE(histogram_empty(hist));
+
+  histogram_destroy(hist);
+  CU_ASSERT_ERRNO(0);
+}
+
+/*
+  This fixture has some zero counts, but some are nonzero (one might
+  be able to create this with a uniform input and capacity, eventually
+  all but one of the bins would underflow).
+*/
+
+extern void test_histogram_empty_nonempty(void)
+{
+  CU_CLEAR_ERRNO();
+
+  const char *path = "fixtures/zero-counts-some.json";
+  histogram_t *hist = histogram_json_load(path);
+
+  CU_ASSERT_ERRNO(0);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(hist);
+
+  CU_ASSERT_FALSE(histogram_empty(hist));
 
   histogram_destroy(hist);
   CU_ASSERT_ERRNO(0);

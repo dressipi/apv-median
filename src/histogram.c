@@ -64,6 +64,25 @@ extern void histogram_destroy(histogram_t *hist)
   free(hist);
 }
 
+/* empty histogram */
+
+static bool node_empty(node_t *node)
+{
+  return node->bin.count == 0;
+}
+
+static bool nodes_empty(node_t *node)
+{
+  return
+    (node == NULL) ||
+    (node_empty(node) && nodes_empty(node->next));
+}
+
+extern bool histogram_empty(const histogram_t *hist)
+{
+  return nodes_empty(hist->nodes);
+}
+
 /* save to and load from JSON */
 
 extern histogram_t* histogram_json_load_stream(FILE *st)
@@ -607,7 +626,7 @@ static int histogram_add_main(histogram_t *hist, double t)
   so that older values are discarded and we have a shorter
   memory of the data input.  The idea is that we can scale
   the histogram so that its overall area (the sum of the bin-
-  counts) does not exceed some fixed value, this scalung makes
+  counts) does not exceed some fixed value, this scaling makes
   the more recent inputs "count more" towards the median than
   the older ones, and repeated scalings in this manner will
   amount to an exponential decay for older data.

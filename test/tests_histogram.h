@@ -22,5 +22,8 @@ extern void test_histogram_json_roundtrip(void);
 extern void test_histogram_capacity_zero(void);
 extern void test_histogram_capacity_empty(void);
 extern void test_histogram_capacity_small(void);
+extern void test_histogram_empty_no_nodes(void);
+extern void test_histogram_empty_zero_counts(void);
+extern void test_histogram_empty_nonempty(void);
 
 #endif

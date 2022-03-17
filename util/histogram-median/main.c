@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
   info("read histogram from %s\n", path);
 
-  if (histogram_num_bins(hist) == 0)
+  if (histogram_empty(hist))
     {
       if (opt.empty_value_given)
         {

@@ -1,5 +1,5 @@
 AC_INIT([libavpmedian],
-	[0.4],
+	[0.5],
   	[jim.green@dressipi.com],
 	[libavpmedian],
 	[https://dressipi.com/])
